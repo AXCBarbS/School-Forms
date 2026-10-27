@@ -1,0 +1,368 @@
+
+{% extends "base.html" %}
+{% load static enr %}
+
+{% block title %}{{ school.name }}{% endblock %}
+
+{% block content %}
+<style>
+  .enr-entry-page {
+    --deped-blue: #123b67;
+    --deped-blue-dark: #0b2948;
+    --deped-blue-light: #edf4fb;
+    --deped-gold: #f2bd42;
+    --enr-border: #dce4ed;
+    --enr-muted: #64748b;
+    color: #243449;
+    padding-bottom: 1.5rem;
+  }
+
+  .enr-entry-page .enr-intro {
+    margin-bottom: 1.25rem;
+  }
+
+  .enr-entry-page .enr-page-title {
+    color: var(--deped-blue);
+    font-weight: 750;
+    letter-spacing: -0.025em;
+  }
+
+  .enr-entry-page .enr-subtitle {
+    color: var(--enr-muted);
+    font-size: .92rem;
+  }
+
+  .enr-entry-page .alert {
+    border-radius: .75rem;
+    padding: .9rem 1rem;
+    border-width: 1px;
+    margin-bottom: 1.25rem;
+  }
+
+  .enr-entry-page .alert-info {
+    background: #eff7ff;
+    border-color: #c9e0f8;
+    color: #174a78;
+  }
+
+  .enr-entry-page .alert-danger {
+    background: #fff1f0;
+    border-color: #f2c7c3;
+    color: #922b21;
+  }
+
+  .enr-entry-page .card {
+    border: 1px solid var(--enr-border);
+    border-radius: .85rem;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 3px 12px rgba(20, 45, 75, .045);
+  }
+
+  .enr-entry-page .card-header {
+    padding: 1rem 1.15rem;
+    background: linear-gradient(110deg, var(--deped-blue), #1b527f);
+    color: #fff;
+    border-bottom: 3px solid var(--deped-gold);
+    font-size: .96rem;
+    letter-spacing: .01em;
+  }
+
+  .enr-entry-page .card-header .text-muted {
+    color: #d8e5f2 !important;
+  }
+
+  .enr-entry-page .table-responsive {
+    width: 100%;
+  }
+
+  .enr-entry-page .enr-table,
+  .enr-entry-page .table {
+    margin-bottom: 0;
+    vertical-align: middle;
+  }
+
+  .enr-entry-page .enr-table thead th,
+  .enr-entry-page .table thead th {
+    background: #f2f6fb;
+    color: #38516c;
+    font-size: .78rem;
+    font-weight: 750;
+    letter-spacing: .055em;
+    padding: .85rem 1rem;
+    text-transform: uppercase;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--enr-border);
+  }
+
+  .enr-entry-page .enr-table tbody td,
+  .enr-entry-page .table tbody td {
+    padding: .8rem 1rem;
+    border-color: #e8edf3;
+  }
+
+  .enr-entry-page .enr-table tbody tr:nth-child(even),
+  .enr-entry-page .table tbody tr:nth-child(even) {
+    background: #fbfcfe;
+  }
+
+  .enr-entry-page .enr-table tbody tr:hover,
+  .enr-entry-page .table tbody tr:hover {
+    background: #f0f6fd;
+  }
+
+  .enr-entry-page .enr-table tbody td:first-child,
+  .enr-entry-page .table tbody td:first-child {
+    color: #233d59;
+    font-weight: 600;
+  }
+
+  .enr-entry-page .enr-table input,
+  .enr-entry-page .enr-table select {
+    min-height: 38px;
+    border: 1px solid #cbd6e2;
+    border-radius: .5rem;
+    background-color: #fff;
+    color: #20364e;
+    padding: .4rem .65rem;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+
+  .enr-entry-page .enr-table input:focus,
+  .enr-entry-page .enr-table select:focus {
+    border-color: #3478b9;
+    box-shadow: 0 0 0 .2rem rgba(52, 120, 185, .14);
+    outline: none;
+  }
+
+  .enr-entry-page .enr-table input {
+    width: 100%;
+    text-align: right;
+  }
+
+  .enr-entry-page .total-cell {
+    color: var(--deped-blue);
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .enr-entry-page #agg-parts {
+    color: inherit;
+  }
+
+  .enr-entry-page .sticky-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    margin-top: 1.25rem;
+    padding: .9rem 1rem;
+    border: 1px solid var(--enr-border);
+    border-radius: .85rem;
+    background: rgba(255, 255, 255, .96);
+    box-shadow: 0 -5px 20px rgba(20, 45, 75, .07);
+    backdrop-filter: blur(10px);
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .enr-entry-page .btn {
+    min-height: 42px;
+    padding: .6rem 1rem;
+    border-radius: .55rem;
+    font-weight: 650;
+    transition: background-color .15s ease, border-color .15s ease,
+                box-shadow .15s ease, transform .15s ease;
+  }
+
+  .enr-entry-page .btn:focus-visible {
+    outline: 3px solid rgba(52, 120, 185, .25);
+    outline-offset: 2px;
+  }
+
+  .enr-entry-page .btn-outline-primary {
+    color: var(--deped-blue);
+    border-color: #9bb5ce;
+    background: #fff;
+  }
+
+  .enr-entry-page .btn-outline-primary:hover {
+    color: #fff;
+    border-color: var(--deped-blue);
+    background: var(--deped-blue);
+  }
+
+  .enr-entry-page .btn-primary {
+    color: #fff;
+    background: var(--deped-blue);
+    border-color: var(--deped-blue);
+  }
+
+  .enr-entry-page .btn-primary:hover {
+    background: var(--deped-blue-dark);
+    border-color: var(--deped-blue-dark);
+    box-shadow: 0 4px 10px rgba(18, 59, 103, .18);
+  }
+
+  .enr-entry-page .btn-link {
+    color: #52677d;
+    text-decoration: none;
+  }
+
+  .enr-entry-page .btn-link:hover {
+    color: var(--deped-blue);
+    text-decoration: underline;
+  }
+
+  .enr-entry-page .text-danger {
+    font-weight: 500;
+  }
+
+  @media (max-width: 576px) {
+    .enr-entry-page .card-header {
+      padding: .85rem;
+    }
+
+    .enr-entry-page .enr-table thead th,
+    .enr-entry-page .table thead th,
+    .enr-entry-page .enr-table tbody td,
+    .enr-entry-page .table tbody td {
+      padding: .7rem .55rem;
+    }
+
+    .enr-entry-page .sticky-actions {
+      gap: .5rem !important;
+      padding: .75rem;
+    }
+
+    .enr-entry-page .sticky-actions .btn {
+      flex: 1 1 auto;
+    }
+  }
+</style>
+
+<div class="enr-entry-page">
+
+  {% include "enrollment/_school_header.html" %}
+
+  {% if prefilled %}
+    <div class="alert alert-info d-flex align-items-start gap-2" role="status">
+      <span aria-hidden="true">ℹ</span>
+      <div>
+        <strong>Pre-filled data</strong>
+        <div>These figures were pre-filled from the district workbook. Review them, correct anything that is wrong, then save and review.</div>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if form.errors %}
+    <div class="alert alert-danger" role="alert">
+      <strong>Please check your entries.</strong>
+      <div>Some values are invalid. Use whole numbers from 0 to {{ form.fields.kinder_m.max_value }}.</div>
+    </div>
+  {% endif %}
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    {% for code, title, rows in sections %}
+      <div class="card mb-4">
+        <div class="card-header fw-semibold">
+          {{ title }}
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-sm enr-table mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Level</th>
+                <th scope="col" class="text-end">Male</th>
+                <th scope="col" class="text-end">Female</th>
+                <th scope="col" class="text-end">Total</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for r in rows %}
+                <tr>
+                  <td>{{ r.label }}</td>
+
+                  <td>
+                    {{ r.m }}
+                    {% for e in r.m.errors %}
+                      <div class="text-danger small text-end">{{ e }}</div>
+                    {% endfor %}
+                  </td>
+
+                  <td>
+                    {{ r.f }}
+                    {% for e in r.f.errors %}
+                      <div class="text-danger small text-end">{{ e }}</div>
+                    {% endfor %}
+                  </td>
+
+                  <td class="total-cell" data-total-for="{{ r.key }}">0</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% endfor %}
+
+    <div class="card mb-4">
+      <div class="card-header fw-semibold d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span>Calculated totals</span>
+        <span class="text-muted fw-normal small">Automatic calculation</span>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead>
+            <tr>
+              <th scope="col">Category</th>
+              <th scope="col" class="text-end">Male</th>
+              <th scope="col" class="text-end">Female</th>
+              <th scope="col" class="text-end">Total</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for key, label in aggs %}
+              <tr>
+                <td>{{ label }}</td>
+                <td class="total-cell" id="agg-{{ key }}-m">0</td>
+                <td class="total-cell" id="agg-{{ key }}-f">0</td>
+                <td class="total-cell" id="agg-{{ key }}-t">0</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="sticky-actions d-flex gap-2">
+      <button type="submit" class="btn btn-outline-primary" name="action" value="save">
+        Save draft
+      </button>
+
+      <button type="submit" class="btn btn-primary" name="action" value="review">
+        Save and review
+      </button>
+
+      <a class="btn btn-link" href="{% url 'enrollment:dashboard' %}">
+        Back to schools
+      </a>
+    </div>
+  </form>
+
+  {{ agg_parts|json_script:"agg-parts" }}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/entry.js' %}"></script>
+{% endblock %}
+```

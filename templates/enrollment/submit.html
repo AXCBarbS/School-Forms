@@ -1,0 +1,385 @@
+{% extends "base.html" %}
+{% load enr %}
+
+{% block title %}Submit · {{ school.name }}{% endblock %}
+
+{% block content %}
+<style>
+  .enr-submit-page {
+    --deped-blue: #123b67;
+    --deped-blue-dark: #0b2948;
+    --deped-gold: #f2bd42;
+    --enr-border: #dce4ed;
+    --enr-muted: #64748b;
+    color: #243449;
+    padding-bottom: 1.5rem;
+  }
+
+  .enr-submit-page .submit-card {
+    max-width: 680px;
+    overflow: hidden;
+    border: 1px solid var(--enr-border);
+    border-radius: .9rem;
+    background: #fff;
+    box-shadow: 0 8px 28px rgba(20, 45, 75, .075);
+  }
+
+  .enr-submit-page .submit-card-header {
+    padding: 1.25rem 1.5rem;
+    color: #fff;
+    background: linear-gradient(110deg, var(--deped-blue-dark), var(--deped-blue));
+    border-bottom: 4px solid var(--deped-gold);
+  }
+
+  .enr-submit-page .submit-card-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 750;
+    letter-spacing: -.015em;
+  }
+
+  .enr-submit-page .submit-card-header p {
+    margin: .4rem 0 0;
+    color: #dce8f4;
+    font-size: .88rem;
+  }
+
+  .enr-submit-page .submit-card-body {
+    padding: 1.5rem;
+  }
+
+  .enr-submit-page .confirmation-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: .8rem;
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+    background: #fff8e8;
+    border: 1px solid #f0d49b;
+    border-radius: .7rem;
+  }
+
+  .enr-submit-page .notice-icon {
+    display: inline-flex;
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #f9e8b9;
+    color: #795718;
+    font-size: 1rem;
+    font-weight: 800;
+  }
+
+  .enr-submit-page .notice-title {
+    margin-bottom: .25rem;
+    color: #684713;
+    font-weight: 750;
+  }
+
+  .enr-submit-page .notice-text {
+    margin: 0;
+    color: #78551b;
+    font-size: .9rem;
+    line-height: 1.6;
+  }
+
+  .enr-submit-page .summary-heading {
+    margin-bottom: .75rem;
+    color: var(--deped-blue);
+    font-size: .95rem;
+    font-weight: 750;
+  }
+
+  .enr-submit-page .summary-table {
+    margin-bottom: 1.25rem;
+    border: 1px solid var(--enr-border);
+    border-radius: .65rem;
+    overflow: hidden;
+  }
+
+  .enr-submit-page .summary-table .table {
+    margin-bottom: 0;
+    vertical-align: middle;
+  }
+
+  .enr-submit-page .summary-table thead th {
+    padding: .8rem .75rem;
+    color: #38516c;
+    background: #f2f6fb;
+    border-bottom: 1px solid var(--enr-border);
+    font-size: .76rem;
+    font-weight: 750;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .enr-submit-page .summary-table tbody td {
+    padding: .8rem .75rem;
+    border-color: #e8edf3;
+    font-size: .9rem;
+  }
+
+  .enr-submit-page .summary-table tbody tr:nth-child(even) {
+    background: #fbfcfe;
+  }
+
+  .enr-submit-page .summary-table tbody td:first-child {
+    color: #233d59;
+    font-weight: 600;
+  }
+
+  .enr-submit-page .summary-table .fw-semibold {
+    color: var(--deped-blue);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .enr-submit-page .alert-danger {
+    padding: 1rem 1.15rem;
+    color: #922b21;
+    background: #fff1f0;
+    border: 1px solid #f2c7c3;
+    border-radius: .7rem;
+  }
+
+  .enr-submit-page .alert-danger ul {
+    padding-left: 1.25rem;
+  }
+
+  .enr-submit-page .alert-danger li + li {
+    margin-top: .35rem;
+  }
+
+  .enr-submit-page .confirmation-check {
+    padding: 1rem;
+    margin: 1.25rem 0;
+    background: #f7f9fc;
+    border: 1px solid var(--enr-border);
+    border-radius: .7rem;
+  }
+
+  .enr-submit-page .form-check {
+    display: flex;
+    align-items: flex-start;
+    gap: .65rem;
+    padding-left: 0;
+  }
+
+  .enr-submit-page .form-check-input {
+    float: none;
+    flex: 0 0 auto;
+    width: 1.15rem;
+    height: 1.15rem;
+    margin: .2rem 0 0;
+    border-color: #9aafc4;
+    cursor: pointer;
+  }
+
+  .enr-submit-page .form-check-input:checked {
+    background-color: var(--deped-blue);
+    border-color: var(--deped-blue);
+  }
+
+  .enr-submit-page .form-check-input:focus {
+    border-color: #3478b9;
+    box-shadow: 0 0 0 .2rem rgba(52, 120, 185, .14);
+  }
+
+  .enr-submit-page .form-check-label {
+    color: #30465e;
+    font-size: .9rem;
+    font-weight: 550;
+    line-height: 1.6;
+    cursor: pointer;
+  }
+
+  .enr-submit-page .submit-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .65rem;
+    padding-top: 1.15rem;
+    border-top: 1px solid #e8edf3;
+  }
+
+  .enr-submit-page .btn {
+    min-height: 42px;
+    padding: .6rem 1rem;
+    border-radius: .55rem;
+    font-weight: 650;
+    transition: background-color .15s ease, border-color .15s ease,
+                box-shadow .15s ease;
+  }
+
+  .enr-submit-page .btn-success {
+    color: #fff;
+    background: #237547;
+    border-color: #237547;
+  }
+
+  .enr-submit-page .btn-success:hover:not(:disabled) {
+    background: #185b35;
+    border-color: #185b35;
+    box-shadow: 0 4px 10px rgba(35, 117, 71, .18);
+  }
+
+  .enr-submit-page .btn-success:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+  }
+
+  .enr-submit-page .btn-link {
+    color: #52677d;
+    text-decoration: none;
+  }
+
+  .enr-submit-page .btn-link:hover {
+    color: var(--deped-blue);
+    text-decoration: underline;
+  }
+
+  .enr-submit-page .btn:focus-visible {
+    outline: 3px solid rgba(52, 120, 185, .25);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 576px) {
+    .enr-submit-page .submit-card-body {
+      padding: 1rem;
+    }
+
+    .enr-submit-page .submit-card-header {
+      padding: 1rem;
+    }
+
+    .enr-submit-page .summary-table .table th,
+    .enr-submit-page .summary-table .table td {
+      padding: .7rem .45rem;
+      font-size: .8rem;
+    }
+
+    .enr-submit-page .submit-actions .btn {
+      flex: 1 1 auto;
+    }
+  }
+  .enr-submit-page {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.enr-submit-page .submit-card {
+  width: 100%;
+  max-width: 680px;
+  margin: auto;
+}
+</style>
+
+<div class="enr-submit-page">
+
+  {% include "enrollment/_school_header.html" %}
+
+  <div class="card submit-card">
+    <div class="submit-card-header">
+      <h2>Confirm submission</h2>
+      <p>Review the summary below before finalizing this school record.</p>
+    </div>
+
+    <div class="submit-card-body">
+
+      <div class="confirmation-notice">
+        <span class="notice-icon" aria-hidden="true">!</span>
+        <div>
+          <div class="notice-title">Important: Final submission</div>
+          <p class="notice-text">
+            Submitting locks this record. A district administrator can reopen it if corrections are needed.
+          </p>
+        </div>
+      </div>
+
+      <div class="summary-heading">Enrollment totals summary</div>
+
+      <div class="summary-table">
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th scope="col">Category</th>
+                <th scope="col" class="text-end">Male</th>
+                <th scope="col" class="text-end">Female</th>
+                <th scope="col" class="text-end">Total</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for key, label in aggs %}
+                {% with t=totals|dictget:key %}
+                  <tr>
+                    <td>{{ label }}</td>
+                    <td class="text-end">M {{ t.0 }}</td>
+                    <td class="text-end">F {{ t.1 }}</td>
+                    <td class="text-end fw-semibold">{{ t.2 }}</td>
+                  </tr>
+                {% endwith %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {% if problems %}
+        <div class="alert alert-danger mb-3" role="alert">
+          <strong>Please resolve these issues before submitting:</strong>
+          <ul class="mb-0 mt-2">
+            {% for p in problems %}
+              <li>{{ p }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="confirmation-check">
+          <div class="form-check mb-0">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="confirm"
+              value="yes"
+              id="c"
+            >
+            <label class="form-check-label" for="c">
+              I confirm these figures are accurate for {{ school.name }}.
+            </label>
+          </div>
+        </div>
+
+        <div class="submit-actions">
+          <button
+            type="submit"
+            class="btn btn-success"
+            {% if problems %}disabled{% endif %}
+          >
+            Submit final
+          </button>
+
+          <a
+            class="btn btn-link"
+            href="{% url 'enrollment:review' school.school_id %}"
+          >
+            Cancel
+          </a>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+```

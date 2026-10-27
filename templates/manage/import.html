@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Import{% endblock %}
+{% block content %}
+<h1 class="h4 mb-3">Import district and school master list</h1>
+<div class="card mb-3"><div class="card-body">
+<form method="post" enctype="multipart/form-data">{% csrf_token %}
+  <div class="mb-3"><label class="form-label">Consolidated SF4 workbook (.xlsx)</label><input class="form-control" type="file" name="workbook" accept=".xlsx" required></div>
+  <div class="form-check"><input class="form-check-input" type="checkbox" name="dry_run" id="dr" checked><label class="form-check-label" for="dr">Dry run (validate and preview only; nothing is saved)</label></div>
+  <div class="form-check mb-3"><input class="form-check-input" type="checkbox" name="with_enrollment" id="we"><label class="form-check-label" for="we">Also load the workbook's figures as pre-filled drafts (portal-entered or submitted data is never overwritten)</label></div>
+  <button class="btn btn-primary">Run</button>
+</form></div></div>
+{% if report %}
+<div class="card mb-3"><div class="card-body">
+  <h2 class="h5">{% if report.committed %}Import committed{% elif report.errors %}Rejected – nothing saved{% else %}Dry run – nothing saved{% endif %}</h2>
+  <ul><li>Rows read: {{ report.rows_read }}</li><li>Districts created: {{ report.districts_created }}</li><li>Schools created: {{ report.schools_created }}, updated: {{ report.schools_updated }}, unchanged: {{ report.schools_unchanged }}</li>
+  <li>Draft records created: {{ report.records_created }}, refreshed: {{ report.records_updated }}, preserved (user data): {{ report.records_preserved }}</li></ul>
+  {% if report.errors %}<div class="alert alert-danger"><strong>{{ report.errors|length }} error(s):</strong><ul class="mb-0">{% for e in report.errors|slice:":100" %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
+  {% if report.warnings %}<div class="alert alert-warning"><strong>{{ report.warnings|length }} warning(s):</strong><ul class="mb-0">{% for e in report.warnings|slice:":100" %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
+  {% if report.schools_moved %}<div class="alert alert-info"><strong>Schools moved between districts:</strong><ul class="mb-0">{% for e in report.schools_moved %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
+</div></div>{% endif %}
+{% if recon %}
+<div class="card"><div class="card-body"><h2 class="h5">Reconciliation with workbook</h2>
+  <p>Rows checked: {{ recon.rows_checked }} · Mismatches: {{ recon.mismatches|length }}</p>
+  {% if recon.mismatches %}<ul class="small">{% for m in recon.mismatches|slice:":100" %}<li>{{ m }}</li>{% endfor %}</ul>{% endif %}
+  <table class="table table-sm w-auto"><thead><tr><th>District</th><th class="text-end">Database K-12</th><th class="text-end">Workbook K-12</th></tr></thead><tbody>{% for name, t in recon.district_totals %}<tr><td>{{ name }}</td><td class="text-end">{{ t.db }}</td><td class="text-end">{{ t.wb }}</td></tr>{% endfor %}</tbody></table>
+</div></div>{% endif %}
+{% endblock %}

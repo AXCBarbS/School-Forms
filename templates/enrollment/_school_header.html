@@ -1,0 +1,5 @@
+<div class="mb-3">
+  <a href="{% url 'enrollment:dashboard' %}" class="small">&larr; All schools</a>
+  <h1 class="h4 mb-0">{{ school.name }}</h1>
+  <div class="text-muted small">School ID {{ school.school_id }} · {{ school.district.name }} District · School Year {{ year }}</div>
+</div>
