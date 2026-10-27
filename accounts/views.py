@@ -34,25 +34,45 @@ def _send(request, user, purpose, new_email=""):
     return False
 
 
+
 @throttle.limit_requests("register", 20, 3600)
 def register(request):
+    """Register without OTP; district administrator approval is required."""
     if request.user.is_authenticated:
         return redirect("enrollment:dashboard")
+
     form = RegistrationForm(request.POST or None)
+
     if request.method == "POST" and form.is_valid():
         cd = form.cleaned_data
-        if form.existing_unverified:
-            user = form.existing_unverified          # never overwrite someone else's pending registration
-            messages.info(request, "This email already has a registration awaiting verification.")
-        else:
-            with transaction.atomic():
-                user = User.objects.create_user(
-                    cd["email"], cd["password1"], full_name=cd["full_name"], district=cd["district"],
-                    role=Role.USER, email_verified=False, approval_status=Approval.PENDING)
-            log(request, "register", user, user=None, actor_email=user.email, district=user.district)
-        request.session[SESSION_VERIFY] = user.pk
-        _send(request, user, OTPChallenge.Purpose.REGISTER)
-        return redirect("accounts:verify")
+
+        with transaction.atomic():
+            user = User.objects.create_user(
+                cd["email"],
+                cd["password1"],
+                full_name=cd["full_name"],
+                district=cd["district"],
+                role=Role.USER,
+                email_verified=True,
+                approval_status=Approval.PENDING,
+            )
+
+            log(
+                request,
+                "register",
+                user,
+                user=None,
+                actor_email=user.email,
+                district=user.district,
+            )
+
+        messages.success(
+            request,
+            "Registration successful. Your account is awaiting approval "
+            "by your district administrator. You can sign in once approved.",
+        )
+        return redirect("accounts:login")
+
     return render(request, "accounts/register.html", {"form": form})
 
 

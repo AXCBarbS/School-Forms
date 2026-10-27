@@ -22,16 +22,14 @@ class RegistrationForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["district"].queryset = District.objects.filter(is_active=True)
-        self.existing_unverified = None
 
     def clean_email(self):
         email = validate_deped_email(self.cleaned_data["email"])
-        existing = User.objects.filter(email__iexact=email).first()
-        if existing:
-            if not existing.email_verified:
-                self.existing_unverified = existing
-            else:
-                raise ValidationError("An account with this email already exists.")
+        if User.objects.filter(email__iexact=email).exists():
+            raise ValidationError(
+                "An account with this email already exists. "
+                "Please sign in or contact your district administrator."
+            )
         return email
 
     def clean(self):
