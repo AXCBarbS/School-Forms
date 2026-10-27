@@ -31,31 +31,43 @@ class EmailDomainTests(BaseTest):
         self.assertEqual(validate_deped_email("a@region.deped.gov.ph"), "a@region.deped.gov.ph")
 
 
+
 class RegistrationTests(BaseTest):
     def _post(self, **over):
-        data = {"full_name": "New Teacher", "email": "new.teacher@deped.gov.ph", "district": self.d1.pk,
-                "password1": PW, "password2": PW}
+        data = {
+            "full_name": "New Teacher",
+            "email": "new.teacher@deped.gov.ph",
+            "district": self.d1.pk,
+            "password1": PW,
+            "password2": PW,
+        }
         data.update(over)
         return self.client.post(reverse("accounts:register"), data)
 
-    def test_register_creates_pending_unverified_user_and_emails_code(self):
+    def test_register_creates_pending_verified_user_without_otp(self):
         r = self._post()
-        self.assertRedirects(r, reverse("accounts:verify"))
+
+        self.assertRedirects(
+            r,
+            reverse("accounts:login"),
+            fetch_redirect_response=False,
+        )
+
         u = User.objects.get(email="new.teacher@deped.gov.ph")
-        self.assertFalse(u.email_verified)
+        self.assertTrue(u.email_verified)
         self.assertEqual(u.approval_status, Approval.PENDING)
         self.assertEqual(u.district, self.d1)
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(mail.outbox[0].to, ["new.teacher@deped.gov.ph"])
-        self.assertRegex(mail.outbox[0].body, r"\b\d{6}\b")
-        self.assertNotEqual(u.password, PW)               # hashed
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertNotEqual(u.password, PW)  # Password must be hashed.
 
-    def test_otp_and_password_are_never_stored_in_plaintext(self):
+    def test_password_is_never_stored_in_plaintext(self):
         self._post()
-        code = re.search(r"\b(\d{6})\b", mail.outbox[0].body).group(1)
-        ch = OTPChallenge.objects.get()
-        self.assertNotIn(code, (ch.code_hash, ch.salt))
-        self.assertEqual(len(ch.code_hash), 64)
+
+        u = User.objects.get(email="new.teacher@deped.gov.ph")
+        self.assertNotEqual(u.password, PW)
+        self.assertTrue(u.check_password(PW))
+        self.assertEqual(OTPChallenge.objects.count(), 0)
+        self.assertEqual(len(mail.outbox), 0)
 
     def test_rejects_non_deped_email(self):
         r = self._post(email="x@gmail.com")
@@ -66,44 +78,71 @@ class RegistrationTests(BaseTest):
     def test_requires_district(self):
         r = self._post(district="")
         self.assertEqual(r.status_code, 200)
-        self.assertFalse(User.objects.filter(email="new.teacher@deped.gov.ph").exists())
+        self.assertFalse(
+            User.objects.filter(email="new.teacher@deped.gov.ph").exists()
+        )
 
     def test_password_confirmation_must_match(self):
         r = self._post(password2="different")
         self.assertEqual(r.status_code, 200)
-        self.assertFalse(User.objects.filter(email="new.teacher@deped.gov.ph").exists())
+        self.assertFalse(
+            User.objects.filter(email="new.teacher@deped.gov.ph").exists()
+        )
 
     def test_weak_password_rejected(self):
         for weak in ("12345678", "password", "short1!"):
             r = self._post(password1=weak, password2=weak)
             self.assertEqual(r.status_code, 200, weak)
-        self.assertFalse(User.objects.filter(email="new.teacher@deped.gov.ph").exists())
+
+        self.assertFalse(
+            User.objects.filter(email="new.teacher@deped.gov.ph").exists()
+        )
 
     def test_duplicate_verified_email_rejected_case_insensitive(self):
         r = self._post(email="A.User@DEPED.gov.ph")
         self.assertEqual(r.status_code, 200)
-        self.assertEqual(User.objects.filter(email__iexact="a.user@deped.gov.ph").count(), 1)
+        self.assertEqual(
+            User.objects.filter(email__iexact="a.user@deped.gov.ph").count(),
+            1,
+        )
 
-    def test_reregistering_unverified_email_does_not_overwrite_account(self):
+    def test_reregistering_existing_email_does_not_overwrite_account(self):
         self._post()
         first = User.objects.get(email="new.teacher@deped.gov.ph")
         old_hash = first.password
+        old_district = first.district
+
         self.client.logout()
-        self._post(district=self.d2.pk, password1="An0ther-Passw0rd!z", password2="An0ther-Passw0rd!z")
+        self._post(
+            district=self.d2.pk,
+            password1="An0ther-Passw0rd!z",
+            password2="An0ther-Passw0rd!z",
+        )
+
         first.refresh_from_db()
         self.assertEqual(first.password, old_hash)
-        self.assertEqual(first.district, self.d1)
+        self.assertEqual(first.district, old_district)
+        self.assertEqual(first.approval_status, Approval.PENDING)
 
     def test_district_cannot_be_unknown(self):
         r = self._post(district=99999)
         self.assertEqual(r.status_code, 200)
-        self.assertFalse(User.objects.filter(email="new.teacher@deped.gov.ph").exists())
+        self.assertFalse(
+            User.objects.filter(email="new.teacher@deped.gov.ph").exists()
+        )
+
+
 
 
 class OTPTests(BaseTest):
     def setUp(self):
         super().setUp()
-        self.u = make_user("pending@deped.gov.ph", self.d1, verified=False, approved=False)
+        self.u = make_user(
+            "pending@deped.gov.ph",
+            self.d1,
+            verified=False,
+            approved=False,
+        )
 
     def code(self):
         return re.search(r"\b(\d{6})\b", mail.outbox[-1].body).group(1)
@@ -111,83 +150,127 @@ class OTPTests(BaseTest):
     def test_correct_code_succeeds_once(self):
         issue_otp(self.u, "register")
         c = self.code()
+
         self.assertTrue(verify_otp(self.u, "register", c)[0])
-        self.assertEqual(verify_otp(self.u, "register", c)[1], "none")        # cannot be reused
+        self.assertEqual(
+            verify_otp(self.u, "register", c)[1],
+            "none",
+        )
 
     def test_wrong_code_then_lockout_after_max_attempts(self):
         issue_otp(self.u, "register")
         good = self.code()
         wrong = "000000" if good != "000000" else "111111"
+
         for _ in range(settings.OTP_MAX_ATTEMPTS - 1):
-            self.assertEqual(verify_otp(self.u, "register", wrong)[1], "wrong")
-        self.assertEqual(verify_otp(self.u, "register", wrong)[1], "locked")
-        self.assertEqual(verify_otp(self.u, "register", good)[1], "none")     # even the right code is dead now
+            self.assertEqual(
+                verify_otp(self.u, "register", wrong)[1],
+                "wrong",
+            )
+
+        self.assertEqual(
+            verify_otp(self.u, "register", wrong)[1],
+            "locked",
+        )
+        self.assertEqual(
+            verify_otp(self.u, "register", good)[1],
+            "none",
+        )
 
     def test_expiry(self):
         issue_otp(self.u, "register")
         c = self.code()
-        OTPChallenge.objects.update(expires_at=timezone.now() - timedelta(seconds=1))
-        self.assertEqual(verify_otp(self.u, "register", c)[1], "expired")
+
+        OTPChallenge.objects.update(
+            expires_at=timezone.now() - timedelta(seconds=1)
+        )
+
+        self.assertEqual(
+            verify_otp(self.u, "register", c)[1],
+            "expired",
+        )
 
     def test_resend_cooldown_and_new_code_invalidates_old(self):
         issue_otp(self.u, "register")
         old = self.code()
+
         with self.assertRaises(OTPCooldown):
             issue_otp(self.u, "register")
-        OTPChallenge.objects.update(last_sent_at=timezone.now() - timedelta(seconds=settings.OTP_RESEND_COOLDOWN_SECONDS + 1))
+
+        OTPChallenge.objects.update(
+            last_sent_at=timezone.now()
+            - timedelta(
+                seconds=settings.OTP_RESEND_COOLDOWN_SECONDS + 1
+            )
+        )
+
         issue_otp(self.u, "register")
         new = self.code()
+
         if new != old:
-            self.assertEqual(verify_otp(self.u, "register", old)[1], "wrong")
+            self.assertEqual(
+                verify_otp(self.u, "register", old)[1],
+                "wrong",
+            )
+
         self.assertTrue(verify_otp(self.u, "register", new)[0])
 
     def test_hourly_send_cap(self):
         for _ in range(settings.OTP_MAX_SENDS_PER_HOUR):
-            OTPChallenge.objects.update(last_sent_at=timezone.now() - timedelta(days=1))
+            OTPChallenge.objects.update(
+                last_sent_at=timezone.now() - timedelta(days=1)
+            )
             issue_otp(self.u, "register")
-        OTPChallenge.objects.update(last_sent_at=timezone.now() - timedelta(days=1))
+
+        OTPChallenge.objects.update(
+            last_sent_at=timezone.now() - timedelta(days=1)
+        )
+
         with self.assertRaises(OTPLimit):
             issue_otp(self.u, "register")
 
-    def test_verify_view_activates_email_but_not_access(self):
-        s = self.client.session
-        s["verify_user_id"] = self.u.pk
-        s.save()
-        issue_otp(self.u, "register")
-        r = self.client.post(reverse("accounts:verify"), {"code": self.code()})
-        self.assertRedirects(r, reverse("accounts:login"))
-        self.u.refresh_from_db()
-        self.assertTrue(self.u.email_verified)
-        self.assertEqual(self.u.approval_status, Approval.PENDING)
-        self.assertFalse(self.client.login(username=self.u.email, password=PW))   # still not approved
-
-    def test_verify_view_wrong_code_shows_error(self):
-        s = self.client.session
-        s["verify_user_id"] = self.u.pk
-        s.save()
-        issue_otp(self.u, "register")
-        r = self.client.post(reverse("accounts:verify"), {"code": "abcdef"})
+    def test_registration_does_not_require_verification_session(self):
+        r = self.client.get(reverse("accounts:register"))
         self.assertEqual(r.status_code, 200)
-        self.u.refresh_from_db()
-        self.assertFalse(self.u.email_verified)
+        self.assertNotIn("verify_user_id", self.client.session)
 
-    def test_verify_requires_registration_session(self):
-        r = self.client.get(reverse("accounts:verify"))
-        self.assertRedirects(r, reverse("accounts:login"))
+    def test_email_send_failure_does_not_affect_registration(self):
+        with mock.patch(
+            "accounts.otp.send_mail",
+            side_effect=OSError("smtp down"),
+        ):
+            r = self.client.post(
+                reverse("accounts:register"),
+                {
+                    "full_name": "X",
+                    "email": "x.y@deped.gov.ph",
+                    "district": self.d1.pk,
+                    "password1": PW,
+                    "password2": PW,
+                },
+            )
 
-    def test_email_send_failure_is_reported_not_crashing(self):
-        with mock.patch("accounts.otp.send_mail", side_effect=OSError("smtp down")):
-            r = self.client.post(reverse("accounts:register"), {
-                "full_name": "X", "email": "x.y@deped.gov.ph", "district": self.d1.pk, "password1": PW, "password2": PW})
         self.assertEqual(r.status_code, 302)
+
+        u = User.objects.get(email="x.y@deped.gov.ph")
+        self.assertTrue(u.email_verified)
+        self.assertEqual(u.approval_status, Approval.PENDING)
+
 
 
 class LoginTests(BaseTest):
     def _login(self, email, pw=PW, **extra):
-        return self.client.post(reverse("accounts:login"), {"email": email, "password": pw, **extra})
+        return self.client.post(
+            reverse("accounts:login"),
+            {"email": email, "password": pw, **extra},
+        )
 
     def test_approved_user_logs_in_to_dashboard(self):
-        self.assertRedirects(self._login(self.u1.email), reverse("enrollment:dashboard"), fetch_redirect_response=False)
+        self.assertRedirects(
+            self._login(self.u1.email),
+            reverse("enrollment:dashboard"),
+            fetch_redirect_response=False,
+        )
 
     def test_pending_approval_cannot_login(self):
         u = make_user("p@deped.gov.ph", self.d1, approved=False)
@@ -195,57 +278,111 @@ class LoginTests(BaseTest):
         self.assertContains(r, "awaiting approval")
         self.assertNotIn("_auth_user_id", self.client.session)
 
-    def test_unverified_cannot_login_and_is_sent_to_verify(self):
-        u = make_user("v@deped.gov.ph", self.d1, verified=False, approved=True)
+    def test_unverified_cannot_login_and_shows_error(self):
+        u = make_user(
+            "v@deped.gov.ph",
+            self.d1,
+            verified=False,
+            approved=True,
+        )
         r = self._login(u.email)
-        self.assertRedirects(r, reverse("accounts:verify"))
+
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "has not verified its email")
         self.assertNotIn("_auth_user_id", self.client.session)
 
     def test_rejected_and_suspended_cannot_login(self):
         u = make_user("r@deped.gov.ph", self.d1)
-        User.objects.filter(pk=u.pk).update(approval_status=Approval.REJECTED)
+        User.objects.filter(pk=u.pk).update(
+            approval_status=Approval.REJECTED
+        )
         self.assertContains(self._login(u.email), "not approved")
+
         u2 = make_user("s@deped.gov.ph", self.d1, active=False)
         self.assertContains(self._login(u2.email), "suspended")
 
     def test_wrong_password_generic_message(self):
-        self.assertContains(self._login(self.u1.email, "nope"), "Invalid email or password")
-        self.assertContains(self._login("ghost@deped.gov.ph"), "Invalid email or password")
+        self.assertContains(
+            self._login(self.u1.email, "nope"),
+            "Invalid email or password",
+        )
+        self.assertContains(
+            self._login("ghost@deped.gov.ph"),
+            "Invalid email or password",
+        )
 
     def test_login_throttle_after_repeated_failures(self):
         for _ in range(settings.LOGIN_MAX_FAILURES):
             self._login(self.u1.email, "bad")
-        r = self._login(self.u1.email, PW)               # correct password but locked out
+
+        r = self._login(self.u1.email, PW)
         self.assertContains(r, "Too many failed attempts")
         self.assertNotIn("_auth_user_id", self.client.session)
 
     def test_open_redirect_blocked(self):
-        r = self._login(self.u1.email, next="https://evil.example/")
-        self.assertRedirects(r, reverse("enrollment:dashboard"), fetch_redirect_response=False)
+        r = self._login(
+            self.u1.email,
+            next="https://evil.example/",
+        )
+        self.assertRedirects(
+            r,
+            reverse("enrollment:dashboard"),
+            fetch_redirect_response=False,
+        )
+
         self.client.logout()
         r = self._login(self.u1.email, next="/export/")
         self.assertEqual(r["Location"], "/export/")
 
     def test_anonymous_redirected_from_protected_pages(self):
-        for name in ("enrollment:dashboard", "enrollment:export", "manage:users", "manage:audit"):
-            self.assertEqual(self.client.get(reverse(name)).status_code, 302, name)
+        for name in (
+            "enrollment:dashboard",
+            "enrollment:export",
+            "manage:users",
+            "manage:audit",
+        ):
+            self.assertEqual(
+                self.client.get(reverse(name)).status_code,
+                302,
+                name,
+            )
 
     def test_session_dies_when_user_suspended(self):
         self.login(self.u1)
-        self.assertEqual(self.client.get(reverse("enrollment:dashboard")).status_code, 200)
+        self.assertEqual(
+            self.client.get(reverse("enrollment:dashboard")).status_code,
+            200,
+        )
+
         User.objects.filter(pk=self.u1.pk).update(is_active=False)
-        self.assertEqual(self.client.get(reverse("enrollment:dashboard")).status_code, 302)
+        self.assertEqual(
+            self.client.get(reverse("enrollment:dashboard")).status_code,
+            302,
+        )
 
     def test_session_dies_when_approval_revoked(self):
         self.login(self.u1)
-        User.objects.filter(pk=self.u1.pk).update(approval_status=Approval.REJECTED)
-        self.assertEqual(self.client.get(reverse("enrollment:dashboard")).status_code, 302)
+        User.objects.filter(pk=self.u1.pk).update(
+            approval_status=Approval.REJECTED
+        )
+        self.assertEqual(
+            self.client.get(reverse("enrollment:dashboard")).status_code,
+            302,
+        )
 
     def test_logout_requires_post(self):
         self.login(self.u1)
-        self.assertEqual(self.client.get(reverse("accounts:logout")).status_code, 405)
+        self.assertEqual(
+            self.client.get(reverse("accounts:logout")).status_code,
+            405,
+        )
+
         self.client.post(reverse("accounts:logout"))
-        self.assertEqual(self.client.get(reverse("enrollment:dashboard")).status_code, 302)
+        self.assertEqual(
+            self.client.get(reverse("enrollment:dashboard")).status_code,
+            302,
+        )
+
 
 
 class EmailChangeAndResetTests(BaseTest):

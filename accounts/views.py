@@ -111,38 +111,105 @@ def resend(request):
     return redirect("accounts:verify")
 
 
+
 def user_login(request):
     if request.user.is_authenticated:
         return redirect("enrollment:dashboard")
+
     form = LoginForm(request.POST or None)
+
     if request.method == "POST" and form.is_valid():
-        ident = f"{request.META.get('REMOTE_ADDR', '?')}|{form.cleaned_data['email'].strip().lower()}"
-        if throttle.is_blocked("login", ident, settings.LOGIN_MAX_FAILURES):
-            form.add_error(None, "Too many failed attempts. Try again in a few minutes.")
-            log(request, "login_blocked", user=None, actor_email=form.cleaned_data["email"])
+        email = form.cleaned_data["email"].strip().lower()
+        ident = f"{request.META.get('REMOTE_ADDR', '?')}|{email}"
+
+        if throttle.is_blocked(
+            "login",
+            ident,
+            settings.LOGIN_MAX_FAILURES,
+        ):
+            form.add_error(
+                None,
+                "Too many failed attempts. Try again in a few minutes.",
+            )
+            log(
+                request,
+                "login_blocked",
+                user=None,
+                actor_email=email,
+            )
+
         else:
             user, problem = form.get_user(request)
+
             if problem is None:
                 throttle.reset("login", ident)
                 login(request, user)
                 log(request, "login", user)
+
                 nxt = request.POST.get("next") or request.GET.get("next")
-                if nxt and url_has_allowed_host_and_scheme(nxt, {request.get_host()}, request.is_secure()):
+
+                if nxt and url_has_allowed_host_and_scheme(
+                    nxt,
+                    {request.get_host()},
+                    request.is_secure(),
+                ):
                     return redirect(nxt)
+
                 return redirect("enrollment:dashboard")
-            throttle.add_failure("login", ident, settings.LOGIN_LOCKOUT_SECONDS)
-            log(request, "login_failed", user=None, actor_email=form.cleaned_data["email"], reason=problem)
+
+            throttle.add_failure(
+                "login",
+                ident,
+                settings.LOGIN_LOCKOUT_SECONDS,
+            )
+            log(
+                request,
+                "login_failed",
+                user=None,
+                actor_email=email,
+                reason=problem,
+            )
+
             if problem == "unverified":
-                request.session[SESSION_VERIFY] = user.pk
-                messages.info(request, "Please verify your email first. Request a code below.")
-                return redirect("accounts:verify")
-            form.add_error(None, {
-                "invalid": "Invalid email or password.",
-                "pending": "Your registration is awaiting approval by your district administrator.",
-                "rejected": "Your registration was not approved. Contact your district administrator.",
-                "suspended": "This account is suspended. Contact your administrator.",
-            }[problem])
-    return render(request, "accounts/login.html", {"form": form, "next": request.GET.get("next", "")})
+                form.add_error(
+                    None,
+                    "This account has not verified its email. "
+                    "Please contact your administrator if you need assistance.",
+                )
+
+            else:
+                error_messages = {
+                    "invalid": "Invalid email or password.",
+                    "pending": (
+                        "Your registration is awaiting approval "
+                        "by your district administrator."
+                    ),
+                    "rejected": (
+                        "Your registration was not approved. "
+                        "Contact your district administrator."
+                    ),
+                    "suspended": (
+                        "This account is suspended. "
+                        "Contact your administrator."
+                    ),
+                }
+
+                form.add_error(
+                    None,
+                    error_messages.get(
+                        problem,
+                        "Unable to log in. Please contact your administrator.",
+                    ),
+                )
+
+    return render(
+        request,
+        "accounts/login.html",
+        {
+            "form": form,
+            "next": request.GET.get("next", ""),
+        },
+    )
 
 
 @require_POST
