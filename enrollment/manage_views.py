@@ -7,6 +7,7 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from accounts.models import Approval, Role, User
@@ -108,7 +109,11 @@ def user_action(request, pk, action):
         next_url = reverse("manage:users") + next_url
 
     # Prevent external or invalid redirects.
-    if not next_url.startswith("/") or next_url.startswith("//"):
+    if not url_has_allowed_host_and_scheme(
+        url=next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
         next_url = reverse("manage:users")
 
     return redirect(next_url)
