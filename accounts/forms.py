@@ -10,43 +10,74 @@ from .validators import normalize_email, validate_deped_email
 User = get_user_model()
 
 
+
 class RegistrationForm(forms.Form):
-    full_name = forms.CharField(max_length=150, strip=True, label="Full name")
+    full_name = forms.CharField(
+        max_length=150,
+        strip=True,
+        label="Full name",
+    )
     email = forms.EmailField(label="DepEd email address")
-    district = forms.ModelChoiceField(queryset=District.objects.none(), label="Assigned district",
-                                      empty_label="Select your district")
-    password1 = forms.CharField(widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}), label="Password")
-    password2 = forms.CharField(widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
-                                label="Confirm password")
+    district = forms.ModelChoiceField(
+        queryset=District.objects.none(),
+        label="Assigned district",
+        empty_label="Select your district",
+    )
+    password1 = forms.CharField(
+        widget=forms.PasswordInput(
+            attrs={"autocomplete": "new-password"}
+        ),
+        label="Password",
+    )
+    password2 = forms.CharField(
+        widget=forms.PasswordInput(
+            attrs={"autocomplete": "new-password"}
+        ),
+        label="Confirm password",
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["district"].queryset = District.objects.filter(is_active=True)
-        self.existing_unverified = None
+        self.fields["district"].queryset = District.objects.filter(
+            is_active=True
+        )
 
     def clean_email(self):
         email = validate_deped_email(self.cleaned_data["email"])
-        existing = User.objects.filter(email__iexact=email).first()
-        if existing:
-            if not existing.email_verified:
-                self.existing_unverified = existing
-            else:
-                raise ValidationError("An account with this email already exists.")
+
+        if User.objects.filter(email__iexact=email).exists():
+            raise ValidationError(
+                "An account with this email already exists. "
+                "Please sign in or contact your district administrator."
+            )
+
         return email
 
     def clean(self):
         data = super().clean()
-        p1, p2 = data.get("password1"), data.get("password2")
-        if p1 and p2:
-            if p1 != p2:
-                self.add_error("password2", "Passwords do not match.")
+        password1 = data.get("password1")
+        password2 = data.get("password2")
+
+        if password1 and password2:
+            if password1 != password2:
+                self.add_error(
+                    "password2",
+                    "Passwords do not match.",
+                )
             else:
                 try:
                     password_validation.validate_password(
-                        p1, User(email=data.get("email", ""), full_name=data.get("full_name", "")))
+                        password1,
+                        User(
+                            email=data.get("email", ""),
+                            full_name=data.get("full_name", ""),
+                        ),
+                    )
                 except ValidationError as exc:
                     self.add_error("password1", exc)
+
         return data
+
 
 
 class LoginForm(forms.Form):
