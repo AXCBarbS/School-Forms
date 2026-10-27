@@ -68,9 +68,10 @@ def _send(request, user, purpose, new_email=""):
 
 @throttle.limit_requests("register", 20, 3600)
 
+
 @throttle.limit_requests("register", 20, 3600)
 def register(request):
-    """Register without OTP; district administrator approval is still required."""
+    """Register without OTP; district administrator approval is required."""
     if request.user.is_authenticated:
         return redirect("enrollment:dashboard")
 
@@ -107,6 +108,7 @@ def register(request):
         return redirect("accounts:login")
 
     return render(request, "accounts/register.html", {"form": form})
+
 
 
 
