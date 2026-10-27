@@ -2,6 +2,7 @@ import os
 import sys
 from pathlib import Path
 from django.core.exceptions import ImproperlyConfigured
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -78,15 +79,37 @@ TEMPLATES = [{
     ]},
 }]
 
-if env("DB_NAME"):
-    DATABASES = {"default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": env("DB_NAME"), "USER": env("DB_USER"), "PASSWORD": env("DB_PASSWORD"),
-        "HOST": env("DB_HOST", "localhost"), "PORT": env("DB_PORT", "5432"),
-        "CONN_MAX_AGE": 60,
-    }}
+
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=0,
+            ssl_require=True,
+        )
+    }
+elif env("DB_NAME", default=""):
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": env("DB_NAME"),
+            "USER": env("DB_USER"),
+            "PASSWORD": env("DB_PASSWORD"),
+            "HOST": env("DB_HOST", "localhost"),
+            "PORT": env("DB_PORT", "5432"),
+            "CONN_MAX_AGE": 60,
+        }
+    }
 else:
-    DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}}
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+
 
 AUTH_USER_MODEL = "accounts.User"
 AUTHENTICATION_BACKENDS = ["accounts.backends.EmailBackend"]
