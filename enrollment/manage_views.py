@@ -100,7 +100,14 @@ def user_action(request, pk, action):
         target_email=target.email,
     )
 
-    messages.success(request, f"{target.email}: {action} done.")
+    # Show a confirmation after the requested action succeeds.
+    if action == "approve":
+        messages.success(
+            request,
+            f"{target.email} has been approved successfully.",
+        )
+    else:
+        messages.success(request, f"{target.email}: {action} done.")
 
     # Preserve query-only return values such as "?status=pending".
     next_url = request.POST.get("next", "").strip()
@@ -108,7 +115,7 @@ def user_action(request, pk, action):
     if next_url.startswith("?"):
         next_url = reverse("manage:users") + next_url
 
-    # Prevent external or invalid redirects.
+    # Fall back to the management page for invalid or external destinations.
     if not url_has_allowed_host_and_scheme(
         url=next_url,
         allowed_hosts={request.get_host()},
