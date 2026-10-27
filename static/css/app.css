@@ -1,0 +1,3240 @@
+/* =========================================================
+   SF4 PORTAL — ORGANIZED STYLESHEET
+   Formatting only: CSS rules and their order are preserved.
+
+   Sections:
+   1. Global styles
+   2. Base layout and institutional navigation
+   3. Responsive navigation
+   4. Login page styles
+   5. Split-screen authentication layout
+   6. Authentication layout refinements
+   ========================================================= */
+
+body { background: #f4f6f9; }
+.navbar-brand small { opacity: .75; font-weight: 400; }
+.card { border: 0; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+table.enr-table th, table.enr-table td { vertical-align: middle; }
+table.enr-table input { max-width: 110px; margin-left: auto; }
+.total-cell { font-variant-numeric: tabular-nums; text-align: end; font-weight: 600; }
+.sticky-actions { position: sticky; bottom: 0; background: #fff; padding: .75rem 0; border-top: 1px solid #dee2e6; z-index: 5; }
+
+/* =========================================================
+   Base layout and institutional navigation
+   ========================================================= */
+
+.app-navbar {
+    background: #12366B !important;
+    padding: 0.8rem 0;
+    border-bottom: 3px solid #B42332;
+    box-shadow: 0 3px 12px rgba(13, 40, 80, 0.12);
+}
+
+.app-navbar-container {
+    padding-left: clamp(1rem, 3vw, 2rem);
+    padding-right: clamp(1rem, 3vw, 2rem);
+}
+
+.app-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-right: 1.5rem;
+    white-space: normal;
+}
+
+.app-brand-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    color: #12366B;
+    background: #FFFFFF;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.app-brand-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.app-brand-title {
+    color: #FFFFFF;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.app-brand-text small {
+    color: #E0EAF7;
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+/* Navigation links */
+.app-nav-links {
+    gap: 2px;
+}
+
+.app-navbar .navbar-nav .nav-link {
+    color: #E5EDF8;
+    font-size: 0.88rem;
+    font-weight: 500;
+    padding: 0.65rem 0.7rem;
+    border-radius: 6px;
+    transition: background-color 0.15s ease;
+}
+
+.app-navbar .navbar-nav .nav-link:hover,
+.app-navbar .navbar-nav .nav-link:focus {
+    color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+/* Account area */
+.app-account-area {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    margin-left: 1rem;
+}
+
+.app-user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    max-width: 210px;
+}
+
+.app-user-label {
+    color: #C7D7ED;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+}
+
+.app-user-name {
+    color: #FFFFFF;
+    font-size: 0.84rem;
+    font-weight: 650;
+    overflow-wrap: anywhere;
+}
+
+.app-user-district {
+    color: #D8E4F3;
+    font-size: 0.75rem;
+}
+
+.app-account-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.app-account-btn,
+.app-logout-btn {
+    min-height: 36px;
+    font-weight: 600;
+}
+
+.app-account-btn:hover {
+    color: #12366B;
+}
+
+.app-logout-btn {
+    color: #12366B;
+    border-color: #FFFFFF;
+}
+
+.app-logout-btn:hover {
+    color: #0D2850;
+    background: #EAF0F8;
+    border-color: #EAF0F8;
+}
+
+/* Institutional accent */
+.app-brand-accent {
+    height: 2px;
+    background: #D5A63C;
+}
+
+/* Main content */
+.app-main {
+    width: 100%;
+    max-width: 1500px;
+    min-height: calc(100vh - 190px);
+    margin: 0 auto;
+    padding: clamp(1rem, 2.5vw, 2rem);
+}
+
+/* Notifications */
+.app-messages {
+    margin-bottom: 1.25rem;
+}
+
+.app-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem 1.1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(15, 35, 65, 0.04);
+}
+
+.app-alert-content {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+/* Footer */
+.app-footer {
+    margin-top: 2rem;
+    background: #FFFFFF;
+    border-top: 1px solid #DCE3ED;
+}
+
+.app-footer-inner {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 1rem clamp(1rem, 3vw, 2rem);
+    color: #64748B;
+    font-size: 0.78rem;
+}
+
+/* Keyboard accessibility */
+.app-navbar a:focus-visible,
+.app-navbar button:focus-visible {
+    outline: 3px solid #F0C96A;
+    outline-offset: 3px;
+}
+
+/* Responsive navigation */
+@media (max-width: 991.98px) {
+    .app-navbar-container {
+        align-items: center;
+    }
+
+    .app-navbar .navbar-collapse {
+        padding-top: 1rem;
+    }
+
+    .app-nav-links {
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .app-account-area {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.8rem;
+        margin: 1rem 0 0;
+    }
+
+    .app-user-info {
+        max-width: 100%;
+    }
+
+    .app-account-actions {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .app-brand {
+        gap: 0.55rem;
+        margin-right: 0.5rem;
+    }
+
+    .app-brand-mark {
+        width: 39px;
+        height: 39px;
+        font-size: 0.82rem;
+    }
+
+    .app-brand-title {
+        font-size: 0.88rem;
+    }
+
+    .app-brand-text small {
+        font-size: 0.67rem;
+    }
+
+    .app-main {
+        padding: 1rem;
+    }
+
+    .app-footer-inner {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+}
+
+/* =========================================
+   Professional SF4 Portal Login Page
+   ========================================= */
+
+.sf4-login {
+    width: 100%;
+    max-width: 440px;
+    margin: 0 auto;
+    color: #253247;
+}
+
+/* Introduction */
+.sf4-login-intro {
+    margin-bottom: 1.75rem;
+}
+
+.sf4-login-description {
+    margin: 0;
+    color: #64748B;
+    font-size: 0.94rem;
+    line-height: 1.75;
+}
+
+/* Form spacing */
+.sf4-login-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.sf4-login-fields label,
+.sf4-login-fields .form-label {
+    display: block;
+    margin-bottom: 0.45rem;
+    color: #253247;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.sf4-login-fields .form-control,
+.sf4-login-fields .form-select {
+    min-height: 46px;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid #CBD5E1;
+    border-radius: 7px;
+    background-color: #FFFFFF;
+    font-size: 0.94rem;
+    transition: border-color 0.15s ease,
+                box-shadow 0.15s ease;
+}
+
+.sf4-login-fields .form-control:focus,
+.sf4-login-fields .form-select:focus {
+    border-color: #12366B;
+    box-shadow: 0 0 0 3px rgba(18, 54, 107, 0.12);
+}
+
+/* Password recovery */
+.sf4-login-recovery {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0.85rem 0 1.35rem;
+}
+
+.sf4-login-recovery a {
+    color: #12366B;
+    font-size: 0.84rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.sf4-login-recovery a:hover {
+    color: #B42332;
+    text-decoration: underline;
+}
+
+/* Primary action */
+.sf4-login-submit {
+    min-height: 48px;
+    padding: 0.75rem 1rem;
+    border: 1px solid #12366B;
+    border-radius: 7px;
+    background-color: #12366B;
+    color: #FFFFFF;
+    font-size: 0.96rem;
+    font-weight: 650;
+    letter-spacing: 0.15px;
+    transition: background-color 0.15s ease,
+                border-color 0.15s ease;
+}
+
+.sf4-login-submit:hover,
+.sf4-login-submit:focus-visible {
+    background-color: #0D2850;
+    border-color: #0D2850;
+}
+
+/* Registration area */
+.sf4-login-registration {
+    margin-top: 1.75rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #E2E8F0;
+    text-align: center;
+}
+
+.sf4-registration-label {
+    margin-bottom: 0.85rem;
+    color: #64748B;
+    font-size: 0.88rem;
+}
+
+.sf4-register-button {
+    min-height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-color: #12366B;
+    border-radius: 7px;
+    color: #12366B;
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+.sf4-register-button:hover {
+    background-color: #12366B;
+    border-color: #12366B;
+    color: #FFFFFF;
+}
+
+/* Institutional footer */
+.sf4-login-footer {
+    margin-top: 1.75rem;
+    text-align: center;
+}
+
+.sf4-footer-line {
+    display: block;
+    width: 42px;
+    height: 3px;
+    margin: 0 auto 1rem;
+    border-radius: 2px;
+    background-color: #B42332;
+}
+
+.sf4-login-footer p {
+    margin-bottom: 0.25rem;
+    color: #475569;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.sf4-footer-separator {
+    padding: 0 0.2rem;
+    color: #B42332;
+}
+
+.sf4-login-footer small {
+    color: #64748B;
+    font-size: 0.75rem;
+}
+
+/* Mobile layout */
+@media (max-width: 575.98px) {
+    .sf4-login {
+        max-width: 100%;
+    }
+
+    .sf4-login-description {
+        font-size: 0.9rem;
+    }
+
+    .sf4-login-submit,
+    .sf4-register-button {
+        min-height: 46px;
+    }
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .sf4-login *,
+    .sf4-login *::before,
+    .sf4-login *::after {
+        transition: none !important;
+    }
+}
+
+/* ================================================
+   SF4 Portal - Split Screen Authentication Design
+   ================================================ */
+
+.sf4-auth-page {
+    min-height: calc(100vh - 100px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.5rem;
+    background:
+        radial-gradient(
+            circle at 10% 15%,
+            rgba(39, 139, 230, 0.15),
+            transparent 35%
+        ),
+        linear-gradient(145deg, #EAF2FC 0%, #F4F7FB 65%, #E8EFF9 100%);
+}
+
+.sf4-auth-shell {
+    display: grid;
+    grid-template-columns: 0.95fr 1.05fr;
+    width: 100%;
+    max-width: 1050px;
+    min-height: 550px;
+    overflow: hidden;
+    background: #FFFFFF;
+    border: 1px solid rgba(18, 54, 107, 0.08);
+    border-radius: 20px;
+    box-shadow: 0 22px 65px rgba(13, 40, 80, 0.17);
+}
+
+/* LEFT WELCOME PANEL */
+
+.sf4-welcome-panel {
+    position: relative;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    padding: clamp(2rem, 5vw, 4.25rem);
+    color: #FFFFFF;
+    background: linear-gradient(
+        145deg,
+        #087CE0 0%,
+        #0759AA 55%,
+        #063D79 100%
+    );
+}
+
+.sf4-welcome-content {
+    position: relative;
+    z-index: 2;
+    max-width: 340px;
+}
+
+.sf4-welcome-label {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    padding: 0.45rem 0.75rem;
+    color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 5px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+}
+
+.sf4-welcome-content h2 {
+    margin: 0 0 0.65rem;
+    color: #FFFFFF;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: 1px;
+    line-height: 1.1;
+}
+
+.sf4-welcome-content h3 {
+    margin: 0 0 1.25rem;
+    color: #FFFFFF;
+    font-size: 1.2rem;
+    font-weight: 650;
+    line-height: 1.5;
+}
+
+.sf4-welcome-content p {
+    max-width: 320px;
+    margin: 0;
+    color: #E2EEFF;
+    font-size: 0.92rem;
+    line-height: 1.9;
+}
+
+.sf4-welcome-divider {
+    width: 48px;
+    height: 3px;
+    margin: 1.75rem 0 1rem;
+    background: #FFFFFF;
+    border-radius: 4px;
+}
+
+.sf4-welcome-caption {
+    color: #D3E6FF;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    line-height: 1.7;
+}
+
+/* Decorative circles */
+
+.sf4-circle {
+    position: absolute;
+    display: block;
+    pointer-events: none;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 50%;
+}
+
+.sf4-circle-one {
+    width: 270px;
+    height: 270px;
+    right: -135px;
+    top: -100px;
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.sf4-circle-two {
+    width: 200px;
+    height: 200px;
+    left: -100px;
+    bottom: -105px;
+    background: rgba(25, 151, 255, 0.35);
+}
+
+.sf4-circle-three {
+    width: 120px;
+    height: 120px;
+    right: 35px;
+    bottom: 35px;
+    background: rgba(1, 40, 91, 0.20);
+}
+
+/* RIGHT FORM PANEL */
+
+.sf4-form-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(2rem, 4.5vw, 4rem);
+    background: #FFFFFF;
+}
+
+.sf4-form-inner {
+    width: 100%;
+    max-width: 365px;
+}
+
+.sf4-form-header {
+    margin-bottom: 2rem;
+}
+
+.sf4-form-eyebrow {
+    display: block;
+    margin-bottom: 0.65rem;
+    color: #64748B;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+}
+
+.sf4-form-heading {
+    margin: 0 0 0.55rem;
+    color: #243247;
+    font-size: clamp(1.8rem, 3vw, 2.2rem);
+    font-weight: 750;
+    letter-spacing: -0.7px;
+    line-height: 1.25;
+}
+
+.sf4-form-description {
+    margin: 0;
+    color: #64748B;
+    font-size: 0.88rem;
+    line-height: 1.7;
+}
+
+/* Form fields */
+
+.sf4-form-inner form {
+    width: 100%;
+}
+
+.sf4-form-inner .form-label,
+.sf4-form-inner label {
+    color: #344054;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.sf4-form-inner .form-control,
+.sf4-form-inner .form-select {
+    min-height: 47px;
+    padding: 0.75rem 0.9rem;
+    color: #253247;
+    background-color: #F8FAFC;
+    border: 1px solid #DFE5ED;
+    border-radius: 7px;
+    font-size: 0.9rem;
+    box-shadow: none;
+}
+
+.sf4-form-inner .form-control:focus,
+.sf4-form-inner .form-select:focus {
+    background-color: #FFFFFF;
+    border-color: #1675CA;
+    box-shadow: 0 0 0 3px rgba(22, 117, 202, 0.12);
+}
+
+.sf4-form-inner .form-control::placeholder {
+    color: #8995A5;
+}
+
+/* Main sign-in button */
+
+.sf4-form-inner .sf4-login-submit,
+.sf4-form-inner button[type="submit"].btn-primary,
+.sf4-form-inner form > .btn-primary {
+    min-height: 47px;
+    color: #FFFFFF;
+    background: #084B87;
+    border: 1px solid #084B87;
+    border-radius: 7px;
+    font-size: 0.94rem;
+    font-weight: 650;
+    box-shadow: 0 3px 8px rgba(8, 75, 135, 0.12);
+    transition: background-color 0.15s ease,
+                box-shadow 0.15s ease;
+}
+
+.sf4-form-inner .sf4-login-submit:hover,
+.sf4-form-inner button[type="submit"].btn-primary:hover,
+.sf4-form-inner form > .btn-primary:hover {
+    color: #FFFFFF;
+    background: #063965;
+    border-color: #063965;
+    box-shadow: 0 5px 12px rgba(8, 75, 135, 0.18);
+}
+
+/* Links */
+
+.sf4-form-inner a {
+    color: #0759AA;
+    font-weight: 600;
+    text-decoration: none;
+    text-underline-offset: 3px;
+}
+
+.sf4-form-inner a:hover {
+    color: #B42332;
+    text-decoration: underline;
+}
+
+/* Registration and recovery spacing */
+
+.sf4-form-inner .sf4-login-registration {
+    margin-top: 1.5rem;
+}
+
+.sf4-form-inner .sf4-login-recovery {
+    margin: 0.8rem 0 1.2rem;
+}
+
+/* Institutional footer */
+
+.sf4-form-footer {
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid #E8EDF4;
+    text-align: center;
+}
+
+.sf4-footer-rule {
+    display: block;
+    width: 34px;
+    height: 3px;
+    margin: 0 auto 0.85rem;
+    background: #B42332;
+    border-radius: 3px;
+}
+
+.sf4-form-footer p {
+    margin: 0 0 0.25rem;
+    color: #475569;
+    font-size: 0.78rem;
+    font-weight: 650;
+}
+
+.sf4-form-footer small {
+    color: #7A8798;
+    font-size: 0.73rem;
+}
+
+/* Tablet */
+
+@media (max-width: 767.98px) {
+    .sf4-auth-page {
+        min-height: auto;
+        padding: 1.5rem 1rem;
+    }
+
+    .sf4-auth-shell {
+        grid-template-columns: 1fr;
+        max-width: 480px;
+        min-height: auto;
+        border-radius: 15px;
+    }
+
+    .sf4-welcome-panel {
+        min-height: 210px;
+        padding: 2rem;
+    }
+
+    .sf4-welcome-label {
+        margin-bottom: 0.9rem;
+    }
+
+    .sf4-welcome-content h2 {
+        font-size: 2rem;
+    }
+
+    .sf4-welcome-content h3 {
+        margin-bottom: 0.6rem;
+        font-size: 1rem;
+    }
+
+    .sf4-welcome-content p {
+        max-width: 350px;
+        font-size: 0.84rem;
+        line-height: 1.7;
+    }
+
+    .sf4-welcome-divider,
+    .sf4-welcome-caption {
+        display: none;
+    }
+
+    .sf4-circle-one {
+        right: -170px;
+        top: -160px;
+    }
+
+    .sf4-circle-three {
+        right: 25px;
+        bottom: -65px;
+    }
+
+    .sf4-form-panel {
+        padding: 2rem;
+    }
+
+    .sf4-form-header {
+        margin-bottom: 1.5rem;
+    }
+}
+
+/* Small mobile screens */
+
+@media (max-width: 420px) {
+    .sf4-auth-page {
+        padding: 1rem 0.65rem;
+    }
+
+    .sf4-auth-shell {
+        border-radius: 12px;
+    }
+
+    .sf4-welcome-panel {
+        min-height: 185px;
+        padding: 1.5rem;
+    }
+
+    .sf4-welcome-content h2 {
+        font-size: 1.8rem;
+    }
+
+    .sf4-form-panel {
+        padding: 1.5rem 1.15rem;
+    }
+
+    .sf4-form-heading {
+        font-size: 1.7rem;
+    }
+
+    .sf4-form-footer {
+        margin-top: 1.5rem;
+    }
+}
+
+/* Accessibility */
+
+.sf4-form-inner a:focus-visible,
+.sf4-form-inner button:focus-visible,
+.sf4-form-inner input:focus-visible,
+.sf4-form-inner select:focus-visible {
+    outline: 3px solid rgba(180, 35, 50, 0.65);
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sf4-auth-page *,
+    .sf4-auth-page *::before,
+    .sf4-auth-page *::after {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* ============================================
+   SF4 Portal - Final Login UI Refinements
+   ============================================ */
+
+/* More balanced page background and proportions */
+.sf4-auth-page {
+    min-height: calc(100vh - 80px);
+    padding: 1.75rem;
+    background: #EDF2F8;
+}
+
+.sf4-auth-shell {
+    grid-template-columns: 0.92fr 1.08fr;
+    max-width: 1050px;
+    min-height: 600px;
+    border: 1px solid #E1E7EF;
+    border-radius: 16px;
+    box-shadow: 0 12px 36px rgba(24, 45, 78, 0.10);
+}
+
+/* Refined welcome panel */
+.sf4-welcome-panel {
+    padding: 3.25rem;
+    background: linear-gradient(155deg, #1268B5 0%, #104E8B 58%, #103B70 100%);
+}
+
+.sf4-welcome-content {
+    max-width: 310px;
+}
+
+.sf4-welcome-content h2 {
+    margin-bottom: 0.55rem;
+    font-size: 2.65rem;
+    font-weight: 750;
+    letter-spacing: 0.5px;
+}
+
+.sf4-welcome-content h3 {
+    font-size: 1.12rem;
+    font-weight: 650;
+}
+
+.sf4-welcome-content p {
+    font-size: 0.88rem;
+    line-height: 1.85;
+    color: #E7F0FC;
+}
+
+.sf4-welcome-label {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.68rem;
+    letter-spacing: 1px;
+}
+
+.sf4-circle-one {
+    width: 230px;
+    height: 230px;
+    right: -115px;
+    top: -110px;
+}
+
+.sf4-circle-two {
+    width: 190px;
+    height: 190px;
+    left: -105px;
+    bottom: -110px;
+}
+
+.sf4-circle-three {
+    width: 120px;
+    height: 120px;
+    right: 28px;
+    bottom: 28px;
+}
+
+/* Align and balance the form panel */
+.sf4-form-panel {
+    padding: 3rem clamp(2rem, 5vw, 4rem);
+}
+
+.sf4-form-inner {
+    width: 100%;
+    max-width: 365px;
+    margin: 0 auto;
+}
+
+.sf4-form-header {
+    margin-bottom: 1.75rem;
+}
+
+.sf4-form-eyebrow {
+    margin-bottom: 0.7rem;
+    color: #64748B;
+    font-size: 0.67rem;
+    letter-spacing: 1.35px;
+}
+
+.sf4-form-heading {
+    margin-bottom: 0.45rem;
+    color: #18365D;
+    font-size: 2rem;
+    font-weight: 750;
+    letter-spacing: -0.6px;
+}
+
+.sf4-form-description {
+    font-size: 0.88rem;
+    line-height: 1.7;
+}
+
+/* Properly style Django-generated form fields */
+.sf4-form-inner form p {
+    margin-bottom: 1.15rem;
+}
+
+.sf4-form-inner form label {
+    display: block;
+    margin-bottom: 0.45rem;
+    color: #344054;
+    font-size: 0.84rem;
+    font-weight: 600;
+}
+
+/* Style inputs even when form_fields.html does not
+   add Bootstrap's form-control class */
+.sf4-form-inner form input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
+.sf4-form-inner form select,
+.sf4-form-inner form textarea {
+    display: block;
+    width: 100%;
+    min-height: 46px;
+    padding: 0.7rem 0.85rem;
+    color: #243247;
+    background-color: #F8FAFC;
+    border: 1px solid #D5DEE9;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    box-shadow: none;
+    transition: border-color 0.15s ease,
+                background-color 0.15s ease,
+                box-shadow 0.15s ease;
+}
+
+.sf4-form-inner form input:focus,
+.sf4-form-inner form select:focus,
+.sf4-form-inner form textarea:focus {
+    background-color: #FFFFFF;
+    border-color: #276FB2;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(39, 111, 178, 0.12);
+}
+
+/* Password recovery */
+.sf4-form-inner .sf4-login-recovery {
+    margin: 0.1rem 0 1.25rem;
+}
+
+.sf4-login-recovery a {
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+/* Sign-in button */
+.sf4-form-inner .sf4-login-submit,
+.sf4-form-inner form > .btn-primary {
+    width: 100%;
+    min-height: 47px;
+    padding: 0.7rem 1rem;
+    background: #104E85;
+    border: 1px solid #104E85;
+    border-radius: 7px;
+    color: #FFFFFF;
+    font-size: 0.92rem;
+    font-weight: 650;
+    box-shadow: 0 3px 7px rgba(16, 78, 133, 0.12);
+}
+
+.sf4-form-inner .sf4-login-submit:hover,
+.sf4-form-inner form > .btn-primary:hover {
+    background: #0B3D6C;
+    border-color: #0B3D6C;
+}
+
+/* Registration section */
+.sf4-form-inner .sf4-login-registration {
+    margin-top: 1.4rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid #E4EAF1;
+}
+
+.sf4-login-registration p {
+    color: #64748B;
+    font-size: 0.84rem;
+}
+
+.sf4-login-registration a {
+    font-size: 0.88rem;
+}
+
+/* Footer */
+.sf4-form-footer {
+    margin-top: 1.5rem;
+    padding-top: 1.1rem;
+}
+
+.sf4-form-footer p {
+    font-size: 0.77rem;
+}
+
+.sf4-form-footer small {
+    font-size: 0.72rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) {
+    .sf4-auth-page {
+        padding: 1rem;
+    }
+
+    .sf4-auth-shell {
+        min-height: auto;
+        grid-template-columns: 1fr;
+    }
+
+    .sf4-welcome-panel {
+        min-height: 215px;
+        padding: 2rem;
+    }
+
+    .sf4-form-panel {
+        padding: 2rem 1.5rem;
+    }
+
+    .sf4-welcome-content h2 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .sf4-auth-page {
+        padding: 0.5rem;
+    }
+
+    .sf4-auth-shell {
+        border-radius: 10px;
+    }
+
+    .sf4-welcome-panel {
+        padding: 1.5rem;
+    }
+
+    .sf4-form-panel {
+        padding: 1.5rem 1.1rem;
+    }
+
+    .sf4-form-heading {
+        font-size: 1.75rem;
+    }
+}
+
+/* =========================================================
+   FULL-SCREEN AUTHENTICATION OVERRIDE
+   Makes the split login layout fill the browser viewport.
+   ========================================================= */
+
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+}
+
+body:has(.sf4-auth-page) {
+    padding: 0;
+    overflow-x: hidden;
+}
+
+body:has(.sf4-auth-page) > nav.navbar {
+    display: none;
+}
+
+body:has(.sf4-auth-page) > main.container-fluid {
+    width: 100%;
+    max-width: none !important;
+    margin: 0;
+    padding: 0 !important;
+}
+
+.sf4-auth-page {
+    display: block;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    background: #FFFFFF;
+}
+
+.sf4-auth-shell {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.sf4-welcome-panel {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    padding: clamp(2rem, 7vw, 7rem);
+}
+
+.sf4-form-panel {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    padding: clamp(1.5rem, 5vw, 5rem);
+    overflow-y: auto;
+}
+
+.sf4-form-inner {
+    width: 100%;
+    max-width: 400px;
+    margin: auto;
+}
+
+@media (max-width: 767.98px) {
+    .sf4-auth-page {
+        height: auto;
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
+
+    .sf4-auth-shell {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: 100vh;
+        min-height: 100dvh;
+        overflow: visible;
+    }
+
+    .sf4-welcome-panel {
+        height: auto;
+        min-height: 220px;
+        padding: 2rem 1.5rem;
+    }
+
+    .sf4-form-panel {
+        height: auto;
+        min-height: 400px;
+        padding: 2.5rem 1.5rem;
+        overflow: visible;
+    }
+
+    .sf4-welcome-divider,
+    .sf4-welcome-caption {
+        display: none;
+    }
+}
+
+/* ==========================================
+   DepEd branding and welcome panel refinements
+   ========================================== */
+
+.sf4-welcome-panel {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: clamp(2rem, 7vh, 4.5rem);
+    background:
+        radial-gradient(
+            circle at 90% 12%,
+            rgba(255, 255, 255, 0.09),
+            transparent 28%
+        ),
+        linear-gradient(145deg, #1769B0 0%, #104E85 58%, #0A3565 100%);
+}
+
+/* Institutional identity */
+.sf4-deped-brand {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    max-width: 440px;
+}
+
+.sf4-deped-logo-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 78px;
+    width: 78px;
+    height: 78px;
+    padding: 8px;
+    background: #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+}
+
+.sf4-deped-logo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.sf4-deped-brand-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 0;
+    color: #FFFFFF;
+}
+
+.sf4-deped-brand-text span {
+    color: #D9E9FA;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 1.1px;
+}
+
+.sf4-deped-brand-text strong {
+    color: #FFFFFF;
+    font-size: clamp(0.95rem, 1.4vw, 1.15rem);
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.sf4-deped-brand-text small {
+    color: #D9E9FA;
+    font-size: 0.76rem;
+    line-height: 1.5;
+}
+
+/* Welcome content hierarchy */
+.sf4-welcome-content {
+    position: relative;
+    z-index: 2;
+    max-width: 420px;
+}
+
+.sf4-welcome-content h2 {
+    font-size: clamp(2.4rem, 4vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: 0.4px;
+}
+
+.sf4-welcome-content h3 {
+    font-size: 1.15rem;
+    line-height: 1.5;
+}
+
+.sf4-welcome-content p {
+    max-width: 390px;
+    color: #E6F0FC;
+    font-size: 0.92rem;
+    line-height: 1.9;
+}
+
+.sf4-welcome-label {
+    border-radius: 5px;
+    letter-spacing: 1.2px;
+}
+
+/* Subtle decorative circles */
+.sf4-circle-one {
+    border-color: rgba(255, 255, 255, 0.10);
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.sf4-circle-two {
+    background: rgba(36, 139, 225, 0.22);
+}
+
+.sf4-circle-three {
+    background: rgba(5, 37, 75, 0.16);
+}
+
+/* Mobile layout */
+@media (max-width: 767.98px) {
+    .sf4-welcome-panel {
+        gap: 1.75rem;
+        padding: 2rem 1.5rem;
+    }
+
+    .sf4-deped-logo-wrap {
+        flex-basis: 60px;
+        width: 60px;
+        height: 60px;
+        padding: 6px;
+    }
+
+    .sf4-deped-brand-text span {
+        font-size: 0.57rem;
+    }
+
+    .sf4-deped-brand-text strong {
+        font-size: 0.95rem;
+    }
+
+    .sf4-deped-brand-text small {
+        font-size: 0.7rem;
+    }
+
+    .sf4-welcome-content h2 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .sf4-deped-brand {
+        gap: 0.7rem;
+    }
+
+    .sf4-deped-logo-wrap {
+        flex-basis: 52px;
+        width: 52px;
+        height: 52px;
+    }
+}
+
+/* =========================================================
+   SF4 AUTHENTICATION — FINAL DEPARTMENTAL DESIGN OVERRIDES
+   Scoped to the authentication page; dashboard styles remain
+   unchanged. Keep this section at the end of app.css.
+   ========================================================= */
+
+body:has(.sf4-auth-page) {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 0;
+    overflow-x: hidden;
+    background: #fff;
+}
+
+body:has(.sf4-auth-page) > nav.navbar {
+    display: none;
+}
+
+body:has(.sf4-auth-page) > main.container-fluid {
+    width: 100%;
+    max-width: none !important;
+    margin: 0;
+    padding: 0 !important;
+}
+
+.sf4-auth-page {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+}
+
+.sf4-auth-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    max-width: none;
+    margin: 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.sf4-welcome-panel {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 100%;
+    padding: clamp(2.5rem, 6vw, 6rem);
+    overflow: hidden;
+    color: #fff;
+    background:
+        linear-gradient(90deg, rgba(180, 35, 50, 0.92) 0, rgba(180, 35, 50, 0.92) 6px, transparent 6px),
+        radial-gradient(circle at 85% 12%, rgba(255, 255, 255, 0.09), transparent 29%),
+        linear-gradient(145deg, #17477F 0%, #12366B 55%, #0B2851 100%);
+}
+
+.sf4-welcome-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 440px;
+}
+
+.sf4-welcome-label {
+    margin-bottom: 1.4rem;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.10);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1.6px;
+}
+
+.sf4-welcome-content h2 {
+    margin: 0 0 0.65rem;
+    color: #fff;
+    font-size: clamp(2.5rem, 4.5vw, 4rem);
+    font-weight: 800;
+    letter-spacing: 0.025em;
+    line-height: 1.08;
+}
+
+.sf4-welcome-content h3 {
+    margin: 0 0 1.1rem;
+    color: #fff;
+    font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+    font-weight: 650;
+    line-height: 1.5;
+}
+
+.sf4-welcome-content p {
+    max-width: 390px;
+    margin: 0;
+    color: #E4EDF8;
+    font-size: 0.95rem;
+    line-height: 1.85;
+}
+
+.sf4-welcome-divider {
+    width: 46px;
+    height: 3px;
+    margin: 1.8rem 0 1rem;
+    border-radius: 2px;
+    background: #D8AD4A;
+}
+
+.sf4-welcome-caption {
+    color: #D8E4F3;
+    font-size: 0.65rem;
+    font-weight: 650;
+    letter-spacing: 1.2px;
+    line-height: 1.7;
+}
+
+/* The logo should be a transparent PNG/SVG for a clean watermark. */
+.sf4-deped-watermark {
+    position: absolute;
+    z-index: 0;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: clamp(280px, 34vw, 560px);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    user-select: none;
+}
+
+.sf4-deped-watermark-logo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0.10;
+    filter: grayscale(1) brightness(0) invert(1);
+}
+
+.sf4-circle {
+    z-index: 1;
+    border-color: rgba(255, 255, 255, 0.10);
+}
+
+.sf4-circle-one {
+    width: 260px;
+    height: 260px;
+    top: -125px;
+    right: -125px;
+    background: rgba(255, 255, 255, 0.045);
+}
+
+.sf4-circle-two {
+    width: 210px;
+    height: 210px;
+    bottom: -115px;
+    left: -110px;
+    background: rgba(255, 255, 255, 0.045);
+}
+
+.sf4-circle-three {
+    width: 125px;
+    height: 125px;
+    right: 8%;
+    bottom: 7%;
+    background: rgba(4, 24, 49, 0.14);
+}
+
+.sf4-form-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 100%;
+    padding: clamp(2rem, 5vw, 5.25rem);
+    overflow-y: auto;
+    background: #fff;
+}
+
+.sf4-form-inner {
+    width: 100%;
+    max-width: 410px;
+    margin: auto;
+}
+
+.sf4-form-header {
+    margin-bottom: 1.8rem;
+}
+
+.sf4-form-eyebrow {
+    display: block;
+    margin-bottom: 0.65rem;
+    color: #64748B;
+    font-size: 0.67rem;
+    font-weight: 750;
+    letter-spacing: 1.5px;
+}
+
+.sf4-form-heading {
+    margin: 0 0 0.55rem;
+    color: #12366B;
+    font-size: clamp(1.8rem, 3vw, 2.25rem);
+    font-weight: 750;
+    letter-spacing: -0.035em;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.sf4-form-description {
+    margin: 0;
+    color: #64748B;
+    font-size: 0.9rem;
+    line-height: 1.7;
+}
+
+.sf4-form-inner form {
+    width: 100%;
+}
+
+.sf4-form-inner form p {
+    margin-bottom: 1.1rem;
+}
+
+.sf4-form-inner .form-label,
+.sf4-form-inner form label {
+    display: block;
+    margin-bottom: 0.45rem;
+    color: #344054;
+    font-size: 0.86rem;
+    font-weight: 650;
+}
+
+.sf4-form-inner .form-control,
+.sf4-form-inner .form-select,
+.sf4-form-inner form input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
+.sf4-form-inner form select,
+.sf4-form-inner form textarea {
+    display: block;
+    width: 100%;
+    min-height: 47px;
+    padding: 0.72rem 0.9rem;
+    border: 1px solid #D5DEE9;
+    border-radius: 7px;
+    background-color: #F8FAFC;
+    color: #243247;
+    font-family: inherit;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    box-shadow: none;
+    transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sf4-form-inner form textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+.sf4-form-inner .form-control::placeholder,
+.sf4-form-inner form input::placeholder,
+.sf4-form-inner form textarea::placeholder {
+    color: #8793A3;
+    opacity: 1;
+}
+
+.sf4-form-inner .form-control:focus,
+.sf4-form-inner .form-select:focus,
+.sf4-form-inner form input:focus,
+.sf4-form-inner form select:focus,
+.sf4-form-inner form textarea:focus {
+    border-color: #245B96;
+    outline: none;
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(36, 91, 150, 0.14);
+}
+
+.sf4-form-inner form input[type="checkbox"],
+.sf4-form-inner form input[type="radio"] {
+    accent-color: #12366B;
+}
+
+.sf4-form-inner .sf4-login-submit,
+.sf4-form-inner button[type="submit"].btn-primary,
+.sf4-form-inner form > .btn-primary {
+    width: 100%;
+    min-height: 48px;
+    padding: 0.75rem 1rem;
+    border: 1px solid #12366B;
+    border-radius: 7px;
+    background: #12366B;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 700;
+    box-shadow: 0 3px 8px rgba(18, 54, 107, 0.14);
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sf4-form-inner .sf4-login-submit:hover,
+.sf4-form-inner button[type="submit"].btn-primary:hover,
+.sf4-form-inner form > .btn-primary:hover {
+    border-color: #0B2851;
+    background: #0B2851;
+    color: #fff;
+    box-shadow: 0 5px 12px rgba(18, 54, 107, 0.18);
+}
+
+.sf4-form-inner a {
+    color: #12366B;
+    font-weight: 600;
+    text-decoration: none;
+    text-underline-offset: 3px;
+}
+
+.sf4-form-inner a:hover {
+    color: #A51F2D;
+    text-decoration: underline;
+}
+
+.sf4-form-inner .sf4-login-recovery {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0.25rem 0 1.25rem;
+}
+
+.sf4-form-inner .sf4-login-registration {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid #E4EAF1;
+    text-align: center;
+}
+
+.sf4-form-footer {
+    margin-top: 1.8rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid #E8EDF4;
+    text-align: center;
+}
+
+.sf4-footer-rule {
+    display: block;
+    width: 36px;
+    height: 3px;
+    margin: 0 auto 0.8rem;
+    border-radius: 3px;
+    background: #B42332;
+}
+
+.sf4-form-footer p {
+    margin: 0 0 0.25rem;
+    color: #475569;
+    font-size: 0.79rem;
+    font-weight: 650;
+}
+
+.sf4-form-footer small {
+    color: #7A8798;
+    font-size: 0.73rem;
+}
+
+/* Bootstrap and Django validation/message feedback */
+.sf4-form-inner .invalid-feedback,
+.sf4-form-inner .errorlist {
+    color: #B42332;
+    font-size: 0.82rem;
+}
+
+.sf4-form-inner .errorlist {
+    margin: 0.35rem 0 0;
+    padding-left: 1.1rem;
+}
+
+.sf4-form-inner .alert {
+    overflow-wrap: anywhere;
+    border-radius: 7px;
+    font-size: 0.88rem;
+}
+
+/* Keep keyboard focus visible */
+.sf4-form-inner a:focus-visible,
+.sf4-form-inner button:focus-visible,
+.sf4-form-inner input:focus-visible,
+.sf4-form-inner select:focus-visible,
+.sf4-form-inner textarea:focus-visible {
+    outline: 3px solid rgba(180, 35, 50, 0.55);
+    outline-offset: 3px;
+}
+
+@media (max-width: 767.98px) {
+    .sf4-auth-shell {
+        grid-template-columns: minmax(0, 1fr);
+        min-height: 100vh;
+        min-height: 100dvh;
+        overflow: visible;
+    }
+
+    .sf4-welcome-panel {
+        min-height: 240px;
+        padding: 2.25rem 1.75rem;
+    }
+
+    .sf4-welcome-content {
+        max-width: 560px;
+    }
+
+    .sf4-welcome-content h2 {
+        font-size: clamp(2rem, 8vw, 2.7rem);
+    }
+
+    .sf4-welcome-content p {
+        font-size: 0.88rem;
+        line-height: 1.7;
+    }
+
+    .sf4-deped-watermark {
+        width: clamp(230px, 58vw, 360px);
+        left: 78%;
+    }
+
+    .sf4-welcome-divider,
+    .sf4-welcome-caption {
+        display: none;
+    }
+
+    .sf4-form-panel {
+        min-height: 420px;
+        padding: 2.5rem 1.75rem;
+        overflow: visible;
+    }
+
+    .sf4-form-inner {
+        max-width: 480px;
+    }
+}
+
+@media (max-width: 420px) {
+    .sf4-welcome-panel {
+        min-height: 215px;
+        padding: 1.75rem 1.25rem;
+    }
+
+    .sf4-welcome-label {
+        margin-bottom: 1rem;
+    }
+
+    .sf4-welcome-content h2 {
+        font-size: 1.9rem;
+    }
+
+    .sf4-welcome-content h3 {
+        font-size: 1rem;
+    }
+
+    .sf4-form-panel {
+        padding: 2rem 1.2rem;
+    }
+
+    .sf4-form-heading {
+        font-size: 1.75rem;
+    }
+
+    .sf4-form-footer {
+        margin-top: 1.4rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sf4-auth-page *,
+    .sf4-auth-page *::before,
+    .sf4-auth-page *::after {
+        scroll-behavior: auto !important;
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* =========================================================
+   REFERENCE-INSPIRED DEPED AUTH SCREEN
+   Centered split card, blue institutional backdrop, soft curves
+   ========================================================= */
+body:has(.sf4-auth-page) {
+    min-height: 100vh;
+    background: linear-gradient(145deg, #0879cf 0%, #075aa5 52%, #073b70 100%);
+}
+
+body:has(.sf4-auth-page) .sf4-auth-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: auto;
+    padding: clamp(1rem, 5vw, 3.5rem);
+    background: transparent;
+}
+
+body:has(.sf4-auth-page) .sf4-auth-shell {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: min(100%, 1120px);
+    min-height: min(620px, calc(100dvh - 4rem));
+    height: auto;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, .3);
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 24px 70px rgba(2, 26, 58, .28);
+}
+
+body:has(.sf4-auth-page) .sf4-welcome-panel {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 100%;
+    padding: clamp(2rem, 5vw, 4.5rem);
+    overflow: hidden;
+    color: #fff;
+    background: linear-gradient(145deg, #087fd1 0%, #0759a4 58%, #063a70 100%);
+}
+
+/* A curved white edge echoes the reference image while keeping the
+   actual form panel fully usable and responsive. */
+body:has(.sf4-auth-page) .sf4-welcome-panel::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    top: -12%;
+    right: -18%;
+    width: 34%;
+    height: 124%;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .075);
+    pointer-events: none;
+}
+
+body:has(.sf4-auth-page) .sf4-welcome-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 390px;
+    margin: 0;
+}
+
+body:has(.sf4-auth-page) .sf4-welcome-label {
+    display: inline-block;
+    margin-bottom: 1.4rem;
+    padding: .42rem .72rem;
+    color: #fff;
+    background: rgba(255, 255, 255, .12);
+    border: 1px solid rgba(255, 255, 255, .28);
+    border-radius: 5px;
+    font-size: .72rem;
+    font-weight: 750;
+    letter-spacing: 1.5px;
+}
+
+body:has(.sf4-auth-page) .sf4-welcome-content h2 {
+    margin: 0 0 .65rem;
+    color: #fff;
+    font-size: clamp(2.25rem, 4vw, 3.35rem);
+    font-weight: 850;
+    letter-spacing: 1.4px;
+    line-height: 1.05;
+}
+
+body:has(.sf4-auth-page) .sf4-welcome-content h3 {
+    margin: 0 0 1rem;
+    color: #fff;
+    font-size: clamp(1.05rem, 1.7vw, 1.3rem);
+    font-weight: 650;
+    line-height: 1.45;
+}
+
+body:has(.sf4-auth-page) .sf4-welcome-content p {
+    max-width: 350px;
+    margin: 0;
+    color: #e5f2ff;
+    font-size: .91rem;
+    line-height: 1.85;
+}
+
+body:has(.sf4-auth-page) .sf4-welcome-divider {
+    width: 46px;
+    height: 3px;
+    margin: 1.6rem 0 .9rem;
+    border-radius: 3px;
+    background: #d9ad45;
+}
+
+body:has(.sf4-auth-page) .sf4-welcome-caption {
+    color: #d7eaff;
+    font-size: .64rem;
+    font-weight: 700;
+    letter-spacing: 1.05px;
+}
+
+/* Keep the watermark subtle and behind welcome copy. */
+body:has(.sf4-auth-page) .sf4-deped-watermark {
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: clamp(260px, 34vw, 470px);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+body:has(.sf4-auth-page) .sf4-deped-watermark-logo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: .095;
+    filter: grayscale(1) brightness(0) invert(1);
+}
+
+body:has(.sf4-auth-page) .sf4-circle {
+    z-index: 1;
+    border-color: rgba(255, 255, 255, .14);
+}
+
+body:has(.sf4-auth-page) .sf4-circle-one {
+    width: 250px;
+    height: 250px;
+    top: -105px;
+    right: -105px;
+    background: rgba(255, 255, 255, .07);
+}
+
+body:has(.sf4-auth-page) .sf4-circle-two {
+    width: 205px;
+    height: 205px;
+    bottom: -115px;
+    left: -100px;
+    background: linear-gradient(145deg, rgba(0, 145, 255, .35), rgba(2, 39, 87, .24));
+}
+
+body:has(.sf4-auth-page) .sf4-circle-three {
+    width: 135px;
+    height: 135px;
+    right: 7%;
+    bottom: 9%;
+    background: rgba(3, 40, 82, .2);
+}
+
+body:has(.sf4-auth-page) .sf4-form-panel {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 100%;
+    padding: clamp(2rem, 5vw, 4.5rem);
+    overflow-y: auto;
+    background: #fff;
+}
+
+body:has(.sf4-auth-page) .sf4-form-inner {
+    width: 100%;
+    max-width: 390px;
+    margin: auto;
+}
+
+body:has(.sf4-auth-page) .sf4-form-header {
+    margin-bottom: 1.75rem;
+}
+
+body:has(.sf4-auth-page) .sf4-form-eyebrow {
+    margin-bottom: .55rem;
+    color: #65758a;
+    font-size: .67rem;
+    font-weight: 750;
+    letter-spacing: 1.4px;
+}
+
+body:has(.sf4-auth-page) .sf4-form-heading {
+    margin: 0 0 .5rem;
+    color: #163b67;
+    font-size: clamp(1.9rem, 3vw, 2.45rem);
+    font-weight: 800;
+    letter-spacing: -.65px;
+    line-height: 1.2;
+}
+
+body:has(.sf4-auth-page) .sf4-form-description {
+    margin: 0;
+    color: #6b7788;
+    font-size: .88rem;
+    line-height: 1.7;
+}
+
+body:has(.sf4-auth-page) .sf4-form-inner form p {
+    margin-bottom: 1rem;
+}
+
+body:has(.sf4-auth-page) .sf4-form-inner form label {
+    display: block;
+    margin-bottom: .42rem;
+    color: #344054;
+    font-size: .84rem;
+    font-weight: 650;
+}
+
+body:has(.sf4-auth-page) .sf4-form-inner form input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
+body:has(.sf4-auth-page) .sf4-form-inner form select,
+body:has(.sf4-auth-page) .sf4-form-inner form textarea {
+    display: block;
+    width: 100%;
+    min-height: 46px;
+    padding: .72rem .85rem;
+    color: #243247;
+    background: #f7f9fc;
+    border: 1px solid #d9e1eb;
+    border-radius: 7px;
+    font: inherit;
+    font-size: .9rem;
+    box-shadow: none;
+    transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
+
+body:has(.sf4-auth-page) .sf4-form-inner form input:focus,
+body:has(.sf4-auth-page) .sf4-form-inner form select:focus,
+body:has(.sf4-auth-page) .sf4-form-inner form textarea:focus {
+    outline: none;
+    background: #fff;
+    border-color: #1769ad;
+    box-shadow: 0 0 0 3px rgba(23, 105, 173, .14);
+}
+
+body:has(.sf4-auth-page) .sf4-form-inner .sf4-login-submit,
+body:has(.sf4-auth-page) .sf4-form-inner form > .btn-primary,
+body:has(.sf4-auth-page) .sf4-form-inner button[type="submit"].btn-primary {
+    width: 100%;
+    min-height: 47px;
+    padding: .72rem 1rem;
+    color: #fff;
+    background: #104e85;
+    border: 1px solid #104e85;
+    border-radius: 7px;
+    font-size: .93rem;
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(16, 78, 133, .15);
+    transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+body:has(.sf4-auth-page) .sf4-form-inner .sf4-login-submit:hover,
+body:has(.sf4-auth-page) .sf4-form-inner form > .btn-primary:hover,
+body:has(.sf4-auth-page) .sf4-form-inner button[type="submit"].btn-primary:hover {
+    color: #fff;
+    background: #0a3964;
+    border-color: #0a3964;
+    box-shadow: 0 6px 14px rgba(16, 78, 133, .2);
+    transform: translateY(-1px);
+}
+
+body:has(.sf4-auth-page) .sf4-form-inner a {
+    color: #125a96;
+    font-weight: 650;
+    text-decoration: none;
+    text-underline-offset: 3px;
+}
+
+body:has(.sf4-auth-page) .sf4-form-inner a:hover {
+    color: #b42332;
+    text-decoration: underline;
+}
+
+body:has(.sf4-auth-page) .sf4-form-footer {
+    margin-top: 1.65rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid #e8edf4;
+    text-align: center;
+}
+
+body:has(.sf4-auth-page) .sf4-footer-rule {
+    display: block;
+    width: 36px;
+    height: 3px;
+    margin: 0 auto .8rem;
+    border-radius: 3px;
+    background: #b42332;
+}
+
+body:has(.sf4-auth-page) .sf4-form-footer p {
+    margin: 0 0 .25rem;
+    color: #475569;
+    font-size: .78rem;
+    font-weight: 700;
+}
+
+body:has(.sf4-auth-page) .sf4-form-footer small {
+    color: #7a8798;
+    font-size: .72rem;
+}
+
+@media (max-width: 767.98px) {
+    body:has(.sf4-auth-page) .sf4-auth-page {
+        align-items: flex-start;
+        padding: 1rem;
+    }
+
+    body:has(.sf4-auth-page) .sf4-auth-shell {
+        grid-template-columns: 1fr;
+        width: min(100%, 500px);
+        min-height: 0;
+        border-radius: 16px;
+    }
+
+    body:has(.sf4-auth-page) .sf4-welcome-panel {
+        min-height: 235px;
+        padding: 2rem 1.75rem;
+    }
+
+    body:has(.sf4-auth-page) .sf4-welcome-content h2 {
+        font-size: 2.25rem;
+    }
+
+    body:has(.sf4-auth-page) .sf4-welcome-divider,
+    body:has(.sf4-auth-page) .sf4-welcome-caption {
+        display: none;
+    }
+
+    body:has(.sf4-auth-page) .sf4-form-panel {
+        min-height: 390px;
+        padding: 2.25rem 1.75rem;
+        overflow: visible;
+    }
+
+    body:has(.sf4-auth-page) .sf4-deped-watermark {
+        width: 260px;
+    }
+}
+
+@media (max-width: 420px) {
+    body:has(.sf4-auth-page) .sf4-auth-page {
+        padding: .55rem;
+    }
+
+    body:has(.sf4-auth-page) .sf4-auth-shell {
+        border-radius: 12px;
+    }
+
+    body:has(.sf4-auth-page) .sf4-welcome-panel {
+        min-height: 210px;
+        padding: 1.5rem 1.25rem;
+    }
+
+    body:has(.sf4-auth-page) .sf4-welcome-content h2 {
+        font-size: 1.95rem;
+    }
+
+    body:has(.sf4-auth-page) .sf4-form-panel {
+        padding: 1.75rem 1.2rem;
+    }
+}
+
+/* FINAL OVERRIDE: keep the DepEd logo clearly visible in its original colors.
+   Keep this block last so earlier duplicate auth styles cannot override it. */
+body:has(.sf4-auth-page) .sf4-deped-watermark {
+    z-index: 1;
+}
+
+body:has(.sf4-auth-page) .sf4-deped-watermark-logo {
+    opacity: 0.75 !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+}
+
+body:has(.sf4-auth-page) .sf4-welcome-content {
+    position: relative;
+    z-index: 2;
+}
+
+/* =========================================================
+   DEPED SEAL COLOR HARMONY — authentication page
+   Palette: institutional blue, navy, seal gold, restrained red.
+   These overrides are intentionally scoped to the auth page.
+   ========================================================= */
+body:has(.sf4-auth-page) .sf4-auth-page {
+    background: #073763;
+}
+
+body:has(.sf4-auth-page) .sf4-auth-shell {
+    border-color: rgba(255, 255, 255, .7);
+    box-shadow: 0 22px 60px rgba(3, 28, 57, .22);
+}
+
+body:has(.sf4-auth-page) .sf4-welcome-panel {
+    background: linear-gradient(145deg, #0878bd 0%, #0866a8 48%, #073763 100%) !important;
+    isolation: isolate;
+}
+
+body:has(.sf4-auth-page) .sf4-welcome-label {
+    border-color: rgba(255, 255, 255, .38);
+    background: rgba(255, 255, 255, .12);
+}
+
+body:has(.sf4-auth-page) .sf4-welcome-divider {
+    background: #f2d21b !important;
+    box-shadow: 0 0 0 1px rgba(242, 210, 27, .08);
+}
+
+body:has(.sf4-auth-page) .sf4-welcome-caption {
+    color: rgba(255, 255, 255, .92);
+}
+
+body:has(.sf4-auth-page) .sf4-deped-watermark {
+    z-index: 1;
+    width: clamp(235px, 29vw, 370px);
+}
+
+body:has(.sf4-auth-page) .sf4-deped-watermark-logo {
+    opacity: .34 !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+}
+
+body:has(.sf4-auth-page) .sf4-welcome-content {
+    position: relative;
+    z-index: 2;
+    text-shadow: 0 1px 2px rgba(4, 34, 66, .12);
+}
+
+body:has(.sf4-auth-page) .sf4-circle {
+    border-color: rgba(255, 255, 255, .19);
+}
+
+body:has(.sf4-auth-page) .sf4-circle-one {
+    background: rgba(255, 255, 255, .075);
+}
+
+body:has(.sf4-auth-page) .sf4-circle-two {
+    background: linear-gradient(145deg, rgba(9, 130, 205, .35), rgba(4, 39, 77, .28));
+}
+
+body:has(.sf4-auth-page) .sf4-circle-three {
+    background: rgba(3, 40, 82, .17);
+}
+
+body:has(.sf4-auth-page) .sf4-form-heading {
+    color: #073763;
+}
+
+body:has(.sf4-auth-page) .sf4-form-eyebrow {
+    color: #315c7e;
+}
+
+body:has(.sf4-auth-page) .sf4-form-inner .sf4-login-submit,
+body:has(.sf4-auth-page) .sf4-form-inner form > .btn-primary,
+body:has(.sf4-auth-page) .sf4-form-inner button[type="submit"].btn-primary {
+    background: #07558b;
+    border-color: #07558b;
+}
+
+body:has(.sf4-auth-page) .sf4-form-inner .sf4-login-submit:hover,
+body:has(.sf4-auth-page) .sf4-form-inner form > .btn-primary:hover,
+body:has(.sf4-auth-page) .sf4-form-inner button[type="submit"].btn-primary:hover {
+    background: #073763;
+    border-color: #073763;
+}
+
+body:has(.sf4-auth-page) .sf4-form-inner a {
+    color: #07558b;
+}
+
+body:has(.sf4-auth-page) .sf4-form-inner a:hover {
+    color: #c82032;
+}
+
+body:has(.sf4-auth-page) .sf4-footer-rule {
+    background: #c82032;
+}
+
+@media (max-width: 767.98px) {
+    body:has(.sf4-auth-page) .sf4-deped-watermark {
+        width: 225px;
+    }
+
+    body:has(.sf4-auth-page) .sf4-deped-watermark-logo {
+        opacity: .28 !important;
+    }
+}
+
+
+/* =========================================================
+   FINAL AUTH BACKGROUND OVERRIDES
+   Photo file expected at: static/image/benguet-background.jpg
+   This affects only the authentication page; dashboard styles stay intact.
+   ========================================================= */
+body:has(.sf4-auth-page) {
+    background: #073763;
+}
+
+body:has(.sf4-auth-page) .sf4-auth-page {
+    position: relative;
+    isolation: isolate;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(1rem, 3vw, 2.5rem);
+    overflow: hidden;
+    background-color: #073763;
+    background-image:
+        linear-gradient(135deg, rgba(4, 38, 76, .68), rgba(8, 102, 168, .48)),
+        url("../images/benguet-background.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+/* Soft extra tint for text contrast without hiding the landscape. */
+body:has(.sf4-auth-page) .sf4-auth-page::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    
+}
+
+body:has(.sf4-auth-page) .sf4-auth-shell {
+    position: relative;
+    z-index: 1;
+    width: min(1120px, 100%);
+    min-height: min(680px, calc(100dvh - 4rem));
+    margin: auto;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, .58);
+    border-radius: 22px;
+    box-shadow: 0 24px 70px rgba(2, 20, 42, .34);
+}
+
+/* Keep the original DepEd Benguet logo colors visible above the panel tint. */
+body:has(.sf4-auth-page) .sf4-deped-watermark {
+    z-index: 1;
+}
+
+body:has(.sf4-auth-page) .sf4-deped-watermark-logo {
+    opacity: .62 !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+}
+
+body:has(.sf4-auth-page) .sf4-welcome-content {
+    position: relative;
+    z-index: 2;
+}
+
+/* Gold highlights complement the seal; red remains a restrained accent. */
+body:has(.sf4-auth-page) .sf4-welcome-divider {
+    background: #f2d21b;
+}
+
+body:has(.sf4-auth-page) .sf4-footer-rule {
+    background: #c82032;
+}
+
+@media (max-width: 767.98px) {
+    body:has(.sf4-auth-page) .sf4-auth-page {
+        min-height: 100vh;
+        min-height: 100dvh;
+        padding: 1rem;
+        overflow-y: auto;
+    }
+
+    body:has(.sf4-auth-page) .sf4-auth-shell {
+        width: min(100%, 520px);
+        min-height: 0;
+        border-radius: 16px;
+    }
+}
+
+@media (max-width: 420px) {
+    body:has(.sf4-auth-page) .sf4-auth-page {
+        padding: .55rem;
+    }
+
+    body:has(.sf4-auth-page) .sf4-auth-shell {
+        border-radius: 12px;
+    }
+}
+
+/* ==========================================
+   SF4 SCHOOLS DASHBOARD
+   DepEd Benguet-inspired styling
+   ========================================== */
+
+.sf4-schools-dashboard {
+    color: #17324f;
+}
+
+.sf4-page-eyebrow {
+    color: #a57a20;
+    letter-spacing: .12em;
+    font-size: .7rem;
+}
+
+.sf4-page-title {
+    color: #073763;
+    letter-spacing: -.025em;
+}
+
+.sf4-school-year {
+    background: #fff;
+    border: 1px solid #dce5ef;
+    border-left: 4px solid #d6a63c;
+    border-radius: 10px;
+    padding: 10px 18px;
+    min-width: 125px;
+}
+
+.sf4-status-link {
+    display: block;
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+}
+
+.sf4-status-card {
+    border: 1px solid #e0e8f1;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(15, 45, 75, .035);
+    transition: transform .18s ease, box-shadow .18s ease,
+                border-color .18s ease;
+}
+
+.sf4-status-link:hover .sf4-status-card {
+    transform: translateY(-3px);
+    border-color: #9dbbd5;
+    box-shadow: 0 8px 20px rgba(15, 45, 75, .09);
+}
+
+.sf4-status-label {
+    color: #61748a;
+    font-size: .82rem;
+    font-weight: 600;
+}
+
+.sf4-status-number {
+    color: #073763;
+    font-size: 1.9rem;
+    font-weight: 750;
+    line-height: 1.35;
+    margin-top: 5px;
+}
+
+.sf4-status-indicator {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 11px;
+    font-size: 1.25rem;
+}
+
+.sf4-status-indicator.is-completed {
+    color: #18794e;
+    background: #e7f6ed;
+}
+
+.sf4-status-indicator.is-pending {
+    color: #946200;
+    background: #fff4d7;
+}
+
+.sf4-status-indicator.is-progress {
+    color: #075b9a;
+    background: #e7f2fc;
+}
+
+.sf4-status-indicator.is-default {
+    color: #53677e;
+    background: #edf1f5;
+}
+
+.sf4-filter-card,
+.sf4-table-card {
+    border: 1px solid #e0e8f1;
+    border-radius: 13px;
+    box-shadow: 0 3px 12px rgba(15, 45, 75, .035);
+    overflow: hidden;
+}
+
+.sf4-filter-icon {
+    color: #0b5c94;
+    font-size: 1.1rem;
+}
+
+.sf4-schools-dashboard .form-label {
+    color: #334d68;
+    margin-bottom: .4rem;
+}
+
+.sf4-schools-dashboard .form-control,
+.sf4-schools-dashboard .form-select,
+.sf4-schools-dashboard .input-group-text {
+    min-height: 42px;
+    border-color: #d7e1ec;
+    font-size: .9rem;
+}
+
+.sf4-schools-dashboard .form-control:focus,
+.sf4-schools-dashboard .form-select:focus {
+    border-color: #4d8fbe;
+    box-shadow: 0 0 0 .2rem rgba(11, 92, 148, .12);
+}
+
+.sf4-search-group .input-group-text {
+    color: #6c8094;
+    background: #f7f9fc;
+}
+
+.sf4-filter-button,
+.sf4-open-button {
+    background: #075b91;
+    border-color: #075b91;
+    font-weight: 600;
+}
+
+.sf4-filter-button:hover,
+.sf4-open-button:hover {
+    background: #06466f;
+    border-color: #06466f;
+}
+
+.sf4-directory-badge {
+    background: #edf5fb;
+    color: #075b91;
+    border: 1px solid #d6e7f5;
+    border-radius: 20px;
+    padding: 7px 12px;
+    font-size: .76rem;
+    font-weight: 600;
+}
+
+.sf4-schools-table thead th {
+    padding: 13px 16px;
+    background: #f4f7fb;
+    color: #52677e;
+    border-bottom: 1px solid #dfe7f0;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .055em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.sf4-schools-table tbody td {
+    padding: 15px 16px;
+    border-color: #edf1f6;
+    font-size: .86rem;
+}
+
+.sf4-schools-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.sf4-school-id {
+    display: inline-block;
+    padding: 5px 8px;
+    border-radius: 6px;
+    background: #f0f5fa;
+    color: #244c70;
+    font-family: var(--bs-font-monospace);
+    font-size: .79rem;
+    white-space: nowrap;
+}
+
+.sf4-school-name {
+    color: #183c5d;
+    min-width: 160px;
+}
+
+.sf4-status-badge {
+    font-size: .72rem;
+    font-weight: 650;
+    padding: 6px 10px;
+    white-space: nowrap;
+}
+
+.sf4-empty-icon {
+    width: 58px;
+    height: 58px;
+    margin-inline: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    background: #edf5fb;
+    color: #075b91;
+    font-size: 1.6rem;
+}
+
+.sf4-schools-dashboard .pagination {
+    gap: 4px;
+}
+
+.sf4-schools-dashboard .page-link {
+    border-radius: 6px;
+    border-color: #dce5ef;
+    color: #075b91;
+}
+
+.sf4-schools-dashboard .page-item.active .page-link {
+    background: #075b91;
+    border-color: #075b91;
+    color: #fff;
+}
+
+@media (max-width: 767.98px) {
+    .sf4-page-title {
+        font-size: 1.4rem;
+    }
+
+    .sf4-status-number {
+        font-size: 1.6rem;
+    }
+
+    .sf4-schools-table thead th,
+    .sf4-schools-table tbody td {
+        padding: 12px;
+    }
+
+    .sf4-directory-badge {
+        font-size: .7rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sf4-status-card {
+        transition: none;
+    }
+}
+
+/* =========================================
+   SF4 PORTAL — PROFESSIONAL APPLICATION SHELL
+   DepEd Benguet visual theme
+   ========================================= */
+
+:root {
+    --app-navy: #12366b;
+    --app-navy-dark: #0b2549;
+    --app-blue: #12649b;
+    --app-gold: #d6a63c;
+    --app-page-bg: #f3f6fa;
+    --app-surface: #ffffff;
+    --app-text: #20344b;
+    --app-muted: #718096;
+    --app-border: #e1e8f0;
+    --app-radius: 12px;
+}
+
+html {
+    min-height: 100%;
+}
+
+body.app-body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--app-page-bg);
+    color: var(--app-text);
+    font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* TOP NAVIGATION */
+.app-navbar {
+    position: relative;
+    z-index: 100;
+    background: linear-gradient(
+        110deg,
+        var(--app-navy-dark),
+        var(--app-navy) 65%,
+        #17477b
+    );
+    padding: 11px 0;
+    box-shadow: 0 3px 12px rgba(11, 37, 73, 0.12);
+}
+
+.app-navbar-container {
+    padding-right: clamp(16px, 2.5vw, 38px);
+    padding-left: clamp(16px, 2.5vw, 38px);
+    gap: 24px;
+}
+
+.app-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    margin-right: 22px;
+    padding: 3px 0;
+    white-space: normal;
+}
+
+.app-brand:hover {
+    color: #fff;
+}
+
+.app-brand-mark {
+    display: inline-flex;
+    flex: 0 0 46px;
+    width: 46px;
+    height: 46px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-bottom: 3px solid var(--app-gold);
+    border-radius: 11px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.app-brand-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.app-brand-title {
+    color: #fff;
+    font-size: 15px;
+    font-weight: 750;
+    line-height: 1.25;
+    letter-spacing: -0.2px;
+}
+
+.app-brand-text small {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+/* NAVIGATION LINKS */
+.app-nav-links {
+    align-items: center;
+    gap: 4px;
+}
+
+.app-navbar .app-nav-links .nav-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 39px;
+    padding: 9px 11px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background-color 0.18s ease,
+                color 0.18s ease,
+                border-color 0.18s ease;
+}
+
+.app-navbar .app-nav-links .nav-link i {
+    font-size: 14px;
+}
+
+.app-navbar .app-nav-links .nav-link:hover,
+.app-navbar .app-nav-links .nav-link:focus-visible {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+/* ACCOUNT AREA */
+.app-account-area {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    padding-left: 17px;
+    border-left: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.app-user-avatar {
+    display: flex;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-size: 17px;
+}
+
+.app-user-info {
+    display: flex;
+    min-width: 110px;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.app-user-label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 8px;
+    font-weight: 750;
+    letter-spacing: 0.11em;
+}
+
+.app-user-name {
+    max-width: 180px;
+    overflow: hidden;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.app-user-district {
+    max-width: 180px;
+    overflow: hidden;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.app-account-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-left: 5px;
+}
+
+.app-account-btn,
+.app-logout-btn {
+    display: inline-flex;
+    min-height: 33px;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border-radius: 7px;
+    font-size: 10px;
+    font-weight: 650;
+    white-space: nowrap;
+    transition: background-color 0.18s ease,
+                border-color 0.18s ease;
+}
+
+.app-account-btn {
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    background: transparent;
+    color: #fff;
+}
+
+.app-account-btn:hover,
+.app-account-btn:focus-visible {
+    border-color: rgba(255, 255, 255, 0.65);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.app-logout-btn {
+    border: 1px solid #fff;
+    background: #fff;
+    color: var(--app-navy);
+}
+
+.app-logout-btn:hover,
+.app-logout-btn:focus-visible {
+    border-color: #f0dca8;
+    background: #f0dca8;
+    color: var(--app-navy-dark);
+}
+
+.app-navbar .navbar-toggler {
+    padding: 6px 9px;
+    border-color: rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+}
+
+/* GOLD INSTITUTIONAL ACCENT */
+.app-brand-accent {
+    position: relative;
+    z-index: 1;
+    height: 3px;
+    background: linear-gradient(
+        90deg,
+        var(--app-gold) 0,
+        #e5c675 24%,
+        rgba(214, 166, 60, 0.2) 65%,
+        transparent 100%
+    );
+}
+
+/* MAIN CONTENT AREA */
+.app-main {
+    flex: 1 0 auto;
+    width: 100%;
+    padding: clamp(18px, 2.2vw, 32px)
+             clamp(14px, 2.5vw, 38px);
+}
+
+.app-content {
+    width: 100%;
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+/* NOTIFICATIONS */
+.app-messages {
+    width: 100%;
+    max-width: 1800px;
+    margin: 0 auto 18px;
+}
+
+.app-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--app-border);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(24, 49, 78, 0.035);
+    font-size: 13px;
+}
+
+.app-alert-content {
+    flex: 1;
+    padding-right: 12px;
+}
+
+/* FOOTER */
+.app-footer {
+    flex-shrink: 0;
+    margin-top: 24px;
+    border-top: 1px solid var(--app-border);
+    background: #fff;
+}
+
+.app-footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px 20px;
+    padding: 15px clamp(16px, 2.5vw, 38px);
+    color: var(--app-muted);
+    font-size: 11px;
+}
+
+.app-footer-inner strong {
+    color: #36516f;
+    font-weight: 750;
+}
+
+.app-footer-divider {
+    margin: 0 4px;
+    color: #b0bdca;
+}
+
+/* RESPONSIVE NAVIGATION */
+@media (max-width: 1399.98px) {
+    .app-navbar-container {
+        gap: 12px;
+    }
+
+    .app-brand {
+        margin-right: 8px;
+    }
+
+    .app-nav-links {
+        gap: 1px;
+    }
+
+    .app-navbar .app-nav-links .nav-link {
+        gap: 6px;
+        padding-right: 8px;
+        padding-left: 8px;
+        font-size: 11px;
+    }
+
+    .app-account-area {
+        gap: 8px;
+        padding-left: 10px;
+    }
+
+    .app-account-actions {
+        gap: 4px;
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 1199.98px) {
+    .app-account-area {
+        width: 100%;
+        margin-top: 14px;
+        margin-left: 0;
+        padding: 14px 0 2px;
+        border-top: 1px solid rgba(255, 255, 255, 0.18);
+        border-left: 0;
+    }
+
+    .app-user-info {
+        flex: 1;
+    }
+
+    .app-account-actions {
+        margin-left: auto;
+    }
+
+    .app-nav-links {
+        align-items: stretch;
+        padding-top: 12px;
+    }
+
+    .app-navbar .app-nav-links .nav-link {
+        justify-content: flex-start;
+        width: 100%;
+        padding: 10px 12px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .app-navbar {
+        padding: 9px 0;
+    }
+
+    .app-brand-mark {
+        flex-basis: 40px;
+        width: 40px;
+        height: 40px;
+        font-size: 12px;
+    }
+
+    .app-brand-title {
+        font-size: 13px;
+    }
+
+    .app-brand-text small {
+        max-width: 205px;
+        font-size: 9px;
+    }
+
+    .app-account-area {
+        flex-wrap: wrap;
+    }
+
+    .app-user-info {
+        min-width: 0;
+    }
+
+    .app-user-name,
+    .app-user-district {
+        max-width: 220px;
+    }
+
+    .app-account-actions {
+        width: 100%;
+        margin-top: 8px;
+    }
+
+    .app-account-actions form {
+        display: inline-flex !important;
+    }
+
+    .app-account-btn,
+    .app-logout-btn {
+        min-height: 36px;
+        font-size: 11px;
+    }
+
+    .app-main {
+        padding: 16px 12px;
+    }
+
+    .app-footer-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 14px 16px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .app-navbar *,
+    .app-status-card,
+    .app-account-actions * {
+        transition: none !important;
+    }
+}

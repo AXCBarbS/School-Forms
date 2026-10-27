@@ -1,0 +1,803 @@
+
+{% extends "base.html" %}
+
+{% block title %}Schools Dashboard{% endblock %}
+
+{% block styles %}
+<style>
+  .sf4-dashboard {
+    --sf4-navy: #12366b;
+    --sf4-blue: #075b9a;
+    --sf4-gold: #d8ad45;
+    --sf4-muted: #718096;
+    --sf4-border: #e5eaf1;
+    color: #243247;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 12px 0 28px;
+  }
+
+  .sf4-page-heading {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 26px;
+  }
+
+  .sf4-eyebrow {
+    color: var(--sf4-blue);
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+  }
+
+  .sf4-page-title {
+    color: var(--sf4-navy);
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 800;
+    letter-spacing: -.035em;
+    margin: 0;
+  }
+
+  .sf4-page-subtitle {
+    color: var(--sf4-muted);
+    font-size: .9rem;
+    margin-top: 7px;
+    margin-bottom: 0;
+  }
+
+  .sf4-school-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--sf4-border);
+    background: #fff;
+    color: var(--sf4-navy);
+    border-radius: 10px;
+    padding: 11px 15px;
+    font-size: .85rem;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(18, 54, 107, .035);
+  }
+
+  .sf4-school-count-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--sf4-gold);
+  }
+
+  .sf4-status-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .sf4-status-card {
+    display: block;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+    background: #fff;
+    border: 1px solid var(--sf4-border);
+    border-radius: 13px;
+    padding: 19px 20px;
+    box-shadow: 0 3px 12px rgba(24, 46, 79, .035);
+    transition: transform .18s ease, box-shadow .18s ease,
+                border-color .18s ease;
+  }
+
+  .sf4-status-card:hover {
+    transform: translateY(-2px);
+    border-color: #c6d8eb;
+    box-shadow: 0 8px 22px rgba(24, 46, 79, .075);
+    color: inherit;
+  }
+
+  .sf4-status-card::after {
+    content: "";
+    position: absolute;
+    right: -19px;
+    top: -26px;
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background: var(--status-tint, #eef5fb);
+  }
+
+  .sf4-status-label {
+    position: relative;
+    z-index: 1;
+    display: block;
+    color: var(--sf4-muted);
+    font-size: .8rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .sf4-status-number {
+    position: relative;
+    z-index: 1;
+    display: block;
+    color: var(--sf4-navy);
+    font-size: 1.9rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -.04em;
+  }
+
+  .sf4-status-caption {
+    display: block;
+    margin-top: 9px;
+    font-size: .75rem;
+    color: #8a96a8;
+  }
+
+  .sf4-status-card.is-active {
+    border-color: #8eb7dc;
+    box-shadow: inset 0 0 0 1px #8eb7dc,
+                0 4px 14px rgba(18, 54, 107, .06);
+  }
+
+  .sf4-status-card.is-active .sf4-status-label {
+    color: var(--sf4-blue);
+  }
+
+  .sf4-toolbar {
+    background: #fff;
+    border: 1px solid var(--sf4-border);
+    border-radius: 13px;
+    padding: 18px;
+    margin-bottom: 18px;
+    box-shadow: 0 3px 12px rgba(24, 46, 79, .025);
+  }
+
+  .sf4-toolbar-heading {
+    color: var(--sf4-navy);
+    font-size: .95rem;
+    font-weight: 750;
+    margin-bottom: 13px;
+  }
+
+  .sf4-toolbar .form-control,
+  .sf4-toolbar .form-select {
+    min-height: 43px;
+    border-color: #dce4ee;
+    border-radius: 8px;
+    font-size: .875rem;
+    color: #27364b;
+    box-shadow: none;
+  }
+
+  .sf4-toolbar .form-control:focus,
+  .sf4-toolbar .form-select:focus {
+    border-color: #79a8d4;
+    box-shadow: 0 0 0 3px rgba(7, 91, 154, .09);
+  }
+
+  .sf4-search-wrap {
+    position: relative;
+  }
+
+  .sf4-search-wrap .form-control {
+    padding-left: 39px;
+  }
+
+  .sf4-search-icon {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8190a4;
+    font-size: 1rem;
+    pointer-events: none;
+  }
+
+  .sf4-btn-primary {
+    min-height: 43px;
+    border-radius: 8px;
+    border: 1px solid var(--sf4-blue);
+    background: var(--sf4-blue);
+    color: #fff;
+    font-size: .85rem;
+    font-weight: 700;
+    padding: 9px 17px;
+    transition: background .18s ease, transform .18s ease;
+  }
+
+  .sf4-btn-primary:hover {
+    color: #fff;
+    background: var(--sf4-navy);
+    border-color: var(--sf4-navy);
+  }
+
+  .sf4-btn-reset {
+    min-height: 43px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #dce4ee;
+    background: #fff;
+    border-radius: 8px;
+    padding: 9px 13px;
+    color: #526176;
+    font-size: .85rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .sf4-btn-reset:hover {
+    background: #f5f8fc;
+    color: var(--sf4-navy);
+  }
+
+  .sf4-table-card {
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid var(--sf4-border);
+    border-radius: 13px;
+    box-shadow: 0 3px 12px rgba(24, 46, 79, .035);
+  }
+
+  .sf4-table-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 19px 21px;
+    border-bottom: 1px solid var(--sf4-border);
+  }
+
+  .sf4-table-title {
+    color: var(--sf4-navy);
+    font-size: 1rem;
+    font-weight: 800;
+    margin: 0;
+  }
+
+  .sf4-table-description {
+    color: var(--sf4-muted);
+    font-size: .8rem;
+    margin: 5px 0 0;
+  }
+
+  .sf4-table-scroll {
+    overflow-x: auto;
+  }
+
+  .sf4-school-table {
+    width: 100%;
+    min-width: 760px;
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .sf4-school-table thead th {
+    background: #f7f9fc;
+    color: #65748a;
+    border-bottom: 1px solid var(--sf4-border);
+    padding: 14px 20px;
+    font-size: .7rem;
+    font-weight: 800;
+    letter-spacing: .055em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .sf4-school-table tbody td {
+    padding: 16px 20px;
+    border-bottom: 1px solid #edf1f6;
+    vertical-align: middle;
+    font-size: .85rem;
+  }
+
+  .sf4-school-table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .sf4-school-table tbody tr {
+    transition: background .15s ease;
+  }
+
+  .sf4-school-table tbody tr:hover {
+    background: #f8fbff;
+  }
+
+  .sf4-school-id {
+    color: #718096;
+    font-size: .8rem;
+    font-weight: 650;
+    white-space: nowrap;
+  }
+
+  .sf4-school-name {
+    display: block;
+    color: #233b5c;
+    font-weight: 750;
+    line-height: 1.45;
+  }
+
+  .sf4-school-district {
+    color: #66758a;
+    font-size: .82rem;
+  }
+
+  .sf4-updated {
+    color: #77859a;
+    font-size: .8rem;
+    white-space: nowrap;
+  }
+
+  .sf4-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: .73rem;
+    font-weight: 750;
+    white-space: nowrap;
+  }
+
+  .sf4-status-badge::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .sf4-status-badge.text-bg-success {
+    background: #e8f7ee !important;
+    color: #207447 !important;
+  }
+
+  .sf4-status-badge.text-bg-warning {
+    background: #fff5d9 !important;
+    color: #926900 !important;
+  }
+
+  .sf4-status-badge.text-bg-danger {
+    background: #fdecec !important;
+    color: #b42332 !important;
+  }
+
+  .sf4-status-badge.text-bg-secondary {
+    background: #edf1f5 !important;
+    color: #596779 !important;
+  }
+
+  .sf4-status-badge.text-bg-info {
+    background: #e6f5fb !important;
+    color: #176b89 !important;
+  }
+
+  .sf4-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 77px;
+    border-radius: 7px;
+    border: 1px solid #d7e5f3;
+    background: #f0f6fc;
+    color: var(--sf4-blue);
+    font-size: .8rem;
+    font-weight: 750;
+    padding: 7px 12px;
+    text-decoration: none;
+    transition: all .15s ease;
+  }
+
+  .sf4-action-btn:hover {
+    color: #fff;
+    border-color: var(--sf4-blue);
+    background: var(--sf4-blue);
+  }
+
+  .sf4-empty-state {
+    padding: 54px 20px !important;
+    text-align: center;
+  }
+
+  .sf4-empty-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 14px;
+    border-radius: 14px;
+    background: #edf4fb;
+    color: var(--sf4-blue);
+    font-size: 1.45rem;
+  }
+
+  .sf4-empty-title {
+    color: var(--sf4-navy);
+    font-size: .98rem;
+    font-weight: 800;
+    margin-bottom: 5px;
+  }
+
+  .sf4-empty-description {
+    color: var(--sf4-muted);
+    font-size: .85rem;
+    margin: 0;
+  }
+
+  .sf4-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+    border-top: 1px solid var(--sf4-border);
+  }
+
+  .sf4-pagination-info {
+    color: var(--sf4-muted);
+    font-size: .8rem;
+  }
+
+  .sf4-pagination .pagination {
+    margin: 0;
+  }
+
+  .sf4-pagination .page-link {
+    border-color: #e0e7f0;
+    color: var(--sf4-blue);
+    font-size: .82rem;
+    border-radius: 7px;
+    margin-left: 4px;
+  }
+
+  .sf4-pagination .page-item.disabled .page-link {
+    color: #8995a6;
+    background: #f7f9fc;
+  }
+
+  @media (max-width: 991.98px) {
+    .sf4-status-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+  }
+
+  @media (max-width: 575.98px) {
+    .sf4-dashboard {
+      padding-top: 4px;
+    }
+
+    .sf4-page-heading {
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .sf4-school-count {
+      padding: 9px 12px;
+    }
+
+    .sf4-status-card {
+      padding: 15px;
+    }
+
+    .sf4-status-number {
+      font-size: 1.65rem;
+    }
+
+    .sf4-toolbar {
+      padding: 14px;
+    }
+
+    .sf4-table-header {
+      padding: 16px;
+    }
+
+    .sf4-pagination {
+      padding: 14px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sf4-status-card,
+    .sf4-school-table tbody tr,
+    .sf4-btn-primary,
+    .sf4-action-btn {
+      transition: none;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sf4-dashboard">
+
+  <!-- Dashboard heading -->
+  <header class="sf4-page-heading">
+    <div>
+      <div class="sf4-eyebrow">School Forms 4 Portal</div>
+
+      <h1 class="sf4-page-title">
+        {% if user.district %}
+          {{ user.district.name }} District
+        {% else %}
+          Schools Dashboard
+        {% endif %}
+      </h1>
+
+      <p class="sf4-page-subtitle">
+        Enrollment monitoring
+        <span class="mx-1">·</span>
+        School Year {{ year }}
+        {% if user.district %}
+          <span class="mx-1">·</span>
+          {{ user.district.name }} District
+        {% else %}
+          <span class="mx-1">·</span>
+          All districts
+        {% endif %}
+      </p>
+    </div>
+
+    <div class="sf4-school-count">
+      <span class="sf4-school-count-dot"></span>
+      {{ total }} school{{ total|pluralize }}
+    </div>
+  </header>
+
+  <!-- School status summary -->
+  <section class="sf4-status-grid" aria-label="School enrollment status summary">
+    {% for key, label in states %}
+      <a
+        class="sf4-status-card{% if state == key %} is-active{% endif %}"
+        style="{% if key == 'completed' %}--status-tint:#e7f6ed;{% elif key == 'in_progress' %}--status-tint:#fff4d8;{% elif key == 'not_started' %}--status-tint:#edf4fb;{% else %}--status-tint:#f0edfc;{% endif %}"
+        href="?state={{ key|urlencode }}{% if q %}&amp;q={{ q|urlencode }}{% endif %}{% if district_filter %}&amp;district={{ district_filter|urlencode }}{% endif %}"
+        aria-label="Filter schools by {{ label }}"
+      >
+        <span class="sf4-status-label">{{ label }}</span>
+
+        <span class="sf4-status-number">
+          {% for k, v in counts.items %}
+            {% if k == key %}{{ v }}{% endif %}
+          {% endfor %}
+        </span>
+
+        <span class="sf4-status-caption">View schools in this status &rarr;</span>
+      </a>
+    {% endfor %}
+  </section>
+
+  <!-- Search and filtering -->
+  <section class="sf4-toolbar" aria-label="Search and filter schools">
+    <div class="sf4-toolbar-heading">Find a school</div>
+
+    <form method="get" class="row g-3 align-items-end">
+      <div class="{% if districts %}col-12 col-lg-5{% else %}col-12 col-lg-7{% endif %}">
+        <label class="form-label small fw-semibold" for="schoolSearch">
+          Search
+        </label>
+
+        <div class="sf4-search-wrap">
+          <span class="sf4-search-icon" aria-hidden="true">&#9906;</span>
+          <input
+            id="schoolSearch"
+            class="form-control"
+            type="search"
+            name="q"
+            value="{{ q }}"
+            placeholder="School name or school ID"
+            aria-label="Search by school name or ID"
+          >
+        </div>
+      </div>
+
+      {% if districts %}
+      <div class="col-12 col-sm-6 col-lg-3">
+        <label class="form-label small fw-semibold" for="districtFilter">
+          District
+        </label>
+
+        <select id="districtFilter" class="form-select" name="district">
+          <option value="">All districts</option>
+          {% for d in districts %}
+          <option
+            value="{{ d.id }}"
+            {% if district_filter|stringformat:"s" == d.id|stringformat:"s" %}selected{% endif %}
+          >
+            {{ d.name }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endif %}
+
+      <div class="col-12 col-sm-6 col-lg-2">
+        <label class="form-label small fw-semibold" for="stateFilter">
+          Enrollment status
+        </label>
+
+        <select id="stateFilter" class="form-select" name="state">
+          <option value="">All statuses</option>
+          {% for key, label in states %}
+          <option value="{{ key }}" {% if state == key %}selected{% endif %}>
+            {{ label }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-lg-2 d-flex gap-2">
+        <button class="btn sf4-btn-primary flex-grow-1" type="submit">
+          Apply filters
+        </button>
+
+        <a
+          class="sf4-btn-reset"
+          href="{% url 'enrollment:dashboard' %}"
+          aria-label="Clear all filters"
+          title="Clear filters"
+        >
+          Reset
+        </a>
+      </div>
+    </form>
+  </section>
+
+  <!-- Schools table -->
+  <section class="sf4-table-card" aria-label="Schools list">
+    <div class="sf4-table-header">
+      <div>
+        <h2 class="sf4-table-title">School directory</h2>
+        <p class="sf4-table-description">
+          Review enrollment progress and open a school's SF4 record.
+        </p>
+      </div>
+    </div>
+
+    <div class="sf4-table-scroll">
+      <table class="table sf4-school-table align-middle">
+        <thead>
+          <tr>
+            <th scope="col">School ID</th>
+            <th scope="col">School name</th>
+
+            {% if user.is_system_admin %}
+              <th scope="col">District</th>
+            {% endif %}
+
+            <th scope="col">Status</th>
+            <th scope="col">Last updated</th>
+            <th scope="col" class="text-end">Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for r in page %}
+          <tr>
+            <td>
+              <span class="sf4-school-id">{{ r.school.school_id }}</span>
+            </td>
+
+            <td>
+              <span class="sf4-school-name">{{ r.school.name }}</span>
+            </td>
+
+            {% if user.is_system_admin %}
+            <td>
+              <span class="sf4-school-district">
+                {{ r.school.district.name }}
+              </span>
+            </td>
+            {% endif %}
+
+            <td>
+              <span class="badge sf4-status-badge text-bg-{{ r.badge }}">
+                {{ r.label }}
+              </span>
+            </td>
+
+            <td>
+              <span class="sf4-updated">
+                {% if r.record %}
+                  {{ r.record.updated_at|date:"M j, Y, g:i A" }}
+                {% else %}
+                  Not yet updated
+                {% endif %}
+              </span>
+            </td>
+
+            <td class="text-end">
+              <a
+                class="sf4-action-btn"
+                href="{% url 'enrollment:entry' r.school.school_id %}"
+                aria-label="{% if r.state == 'completed' %}View{% else %}Open{% endif %} SF4 record for {{ r.school.name }}"
+              >
+                {% if r.state == 'completed' %}
+                  View record &rarr;
+                {% else %}
+                  Open record &rarr;
+                {% endif %}
+              </a>
+            </td>
+          </tr>
+
+          {% empty %}
+          <tr>
+            <td
+              colspan="{% if user.is_system_admin %}6{% else %}5{% endif %}"
+              class="sf4-empty-state"
+            >
+              <div class="sf4-empty-icon" aria-hidden="true">&#9906;</div>
+
+              <div class="sf4-empty-title">No schools found</div>
+
+              <p class="sf4-empty-description">
+                No schools match your current search or filters.
+                Try changing your search terms or resetting the filters.
+              </p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if page.paginator.num_pages > 1 %}
+    <div class="sf4-pagination">
+      <div class="sf4-pagination-info">
+        Page <strong>{{ page.number }}</strong>
+        of <strong>{{ page.paginator.num_pages }}</strong>
+      </div>
+
+      <nav aria-label="School list pagination">
+        <ul class="pagination pagination-sm">
+          {% if page.has_previous %}
+          <li class="page-item">
+            <a
+              class="page-link"
+              href="?page={{ page.previous_page_number }}&amp;q={{ q|urlencode }}&amp;state={{ state|urlencode }}{% if district_filter %}&amp;district={{ district_filter|urlencode }}{% endif %}"
+              aria-label="Previous page"
+            >
+              &larr; Previous
+            </a>
+          </li>
+          {% else %}
+          <li class="page-item disabled">
+            <span class="page-link">&larr; Previous</span>
+          </li>
+          {% endif %}
+
+          {% if page.has_next %}
+          <li class="page-item">
+            <a
+              class="page-link"
+              href="?page={{ page.next_page_number }}&amp;q={{ q|urlencode }}&amp;state={{ state|urlencode }}{% if district_filter %}&amp;district={{ district_filter|urlencode }}{% endif %}"
+              aria-label="Next page"
+            >
+              Next &rarr;
+            </a>
+          </li>
+          {% else %}
+          <li class="page-item disabled">
+            <span class="page-link">Next &rarr;</span>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+    {% endif %}
+  </section>
+
+</div>
+{% endblock %}

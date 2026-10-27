@@ -1,0 +1,82 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ block.super }}{% endblock %}
+
+{% block content %}
+<section class="sf4-auth-page">
+    <div class="sf4-auth-shell">
+
+        <!-- LEFT PANEL: DepEd-branded welcome section -->
+        <aside class="sf4-welcome-panel">
+
+            <!-- DepEd logo background watermark -->
+            <div class="sf4-deped-watermark" aria-hidden="true">
+                <img
+                    src="{% static 'images/deped-logo.png' %}"
+                    alt=""
+                    class="sf4-deped-watermark-logo"
+                >
+            </div>
+
+            <!-- Welcome text -->
+            <div class="sf4-welcome-content">
+
+                
+            </div>
+
+            <!-- Decorative background circles -->
+            <span
+                class="sf4-circle sf4-circle-one"
+                aria-hidden="true">
+            </span>
+
+            <span
+                class="sf4-circle sf4-circle-two"
+                aria-hidden="true">
+            </span>
+
+            <span
+                class="sf4-circle sf4-circle-three"
+                aria-hidden="true">
+            </span>
+
+        </aside>
+
+        <!-- RIGHT PANEL: Authentication form -->
+        <div class="sf4-form-panel">
+            <div class="sf4-form-inner">
+
+                <header class="sf4-form-header">
+                    <span class="sf4-form-eyebrow">
+                        SCHOOL FORMS 4 PORTAL
+                    </span>
+
+                    <h1 class="sf4-form-heading">
+                        {% block heading %}{% endblock %}
+                    </h1>
+
+                    <p class="sf4-form-description">
+                        Enter your credentials to access your account.
+                    </p>
+                </header>
+
+                {% block body %}{% endblock %}
+
+                <footer class="sf4-form-footer">
+                    <span class="sf4-footer-rule"></span>
+
+                    <p>Schools Division Office of Benguet</p>
+
+                    <small>
+                        Secure access for authorized users
+                    </small>
+                </footer>
+
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}

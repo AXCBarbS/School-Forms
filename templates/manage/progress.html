@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Progress{% endblock %}
+{% block content %}
+<h1 class="h4 mb-3">Submission progress · School Year {{ year }}</h1>
+<div class="card"><div class="table-responsive"><table class="table align-middle mb-0">
+<thead class="table-light"><tr><th>District</th><th class="text-end">Schools</th><th class="text-end">Not started</th><th class="text-end">Pre-filled</th><th class="text-end">In progress</th><th class="text-end">Completed</th><th style="width:20%">Completion</th></tr></thead><tbody>
+{% for r in rows %}<tr><td>{{ r.district }}</td><td class="text-end">{{ r.total }}</td><td class="text-end">{{ r.not_started }}</td><td class="text-end">{{ r.prefilled }}</td><td class="text-end">{{ r.in_progress }}</td><td class="text-end">{{ r.completed }}</td>
+<td><div class="progress" role="progressbar"><div class="progress-bar bg-success" style="width:{{ r.pct }}%">{{ r.pct }}%</div></div></td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endblock %}

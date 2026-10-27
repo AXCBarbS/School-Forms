@@ -1,0 +1,35 @@
+
+{% extends "accounts/_auth_card.html" %}
+
+{% block title %}Sign In{% endblock %}
+{% block heading %}Sign in{% endblock %}
+
+{% block body %}
+<form method="post" novalidate>
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+
+    {% include "accounts/_form_fields.html" %}
+
+    <div class="sf4-login-recovery">
+        <a href="{% url 'accounts:password_reset' %}">
+            Forgot password?
+        </a>
+    </div>
+
+    <button type="submit"
+            class="btn btn-primary w-100 sf4-login-submit">
+        Sign In
+    </button>
+</form>
+
+<div class="sf4-login-registration text-center">
+    <p class="small text-muted mb-2">
+        Don't have an account yet?
+    </p>
+
+    <a href="{% url 'accounts:register' %}">
+        Create an account
+    </a>
+</div>
+{% endblock %}

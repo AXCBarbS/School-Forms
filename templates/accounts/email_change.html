@@ -1,0 +1,8 @@
+{% extends "accounts/_auth_card.html" %}
+{% block title %}Change email{% endblock %}
+{% block heading %}Change your DepEd email{% endblock %}
+{% block body %}
+<p class="text-muted small">A code is sent to the NEW address; your email changes only after you enter it.</p>
+<form method="post" novalidate>{% csrf_token %}{% include "accounts/_form_fields.html" %}
+<button class="btn btn-primary w-100">Send code</button></form>
+{% endblock %}
