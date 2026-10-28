@@ -57,11 +57,16 @@ def users(request):
     )
 
 
+
+
 @require_POST
 @manager_required
 def user_action(request, pk, action):
-    # Enforce the manager's user/district access scope.
-    target = get_object_or_404(_managed_users(request.user), pk=pk)
+    # Restrict the target to users the manager is allowed to manage.
+    target = get_object_or_404(
+        _managed_users(request.user),
+        pk=pk,
+    )
 
     if target.pk == request.user.pk:
         raise PermissionDenied
@@ -72,7 +77,9 @@ def user_action(request, pk, action):
                 request,
                 "The user has not verified their email yet.",
             )
-            return redirect("manage:users")
+            return redirect(
+                reverse("manage:users") + "?status=pending"
+            )
 
         target.approval_status = Approval.APPROVED
         target.approved_by = request.user
@@ -100,30 +107,41 @@ def user_action(request, pk, action):
         target_email=target.email,
     )
 
-    # Show a confirmation after the requested action succeeds.
     if action == "approve":
         messages.success(
             request,
             f"{target.email} has been approved successfully.",
         )
     else:
-        messages.success(request, f"{target.email}: {action} done.")
+        messages.success(
+            request,
+            f"{target.email}: {action} done.",
+        )
 
-    # Preserve query-only return values such as "?status=pending".
-    next_url = request.POST.get("next", "").strip()
+    # Preserve the selected Users tab without redirecting elsewhere.
+    allowed_statuses = {
+        "pending",
+        "unverified",
+        "approved",
+        "rejected",
+        "suspended",
+    }
 
-    if next_url.startswith("?"):
-        next_url = reverse("manage:users") + next_url
+    status = request.POST.get("status", "").strip()
 
-    # Fall back to the management page for invalid or external destinations.
-    if not url_has_allowed_host_and_scheme(
-        url=next_url,
-        allowed_hosts={request.get_host()},
-        require_https=request.is_secure(),
-    ):
-        next_url = reverse("manage:users")
+    # Support the existing form's next="?status=pending" value.
+    next_value = request.POST.get("next", "").strip()
 
-    return redirect(next_url)
+    if next_value.startswith("?status="):
+        status = next_value.removeprefix("?status=").split("&", 1)[0]
+
+    if status not in allowed_statuses:
+        status = "pending"
+
+    return redirect(
+        f"{reverse('manage:users')}?status={status}"
+    )
+
 
 
 @manager_required

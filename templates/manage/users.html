@@ -1,25 +1,136 @@
+
 {% extends "base.html" %}
 {% block title %}Users{% endblock %}
+
 {% block content %}
 <h1 class="h4 mb-3">User accounts</h1>
+
 <ul class="nav nav-pills mb-3">
-  <li class="nav-item"><a class="nav-link {% if status == 'pending' %}active{% endif %}" href="?status=pending">Awaiting approval</a></li>
-  <li class="nav-item"><a class="nav-link {% if status == 'unverified' %}active{% endif %}" href="?status=unverified">Unverified email</a></li>
-  <li class="nav-item"><a class="nav-link {% if status == 'approved' %}active{% endif %}" href="?status=approved">Approved</a></li>
-  <li class="nav-item"><a class="nav-link {% if status == 'rejected' %}active{% endif %}" href="?status=rejected">Rejected</a></li>
-  <li class="nav-item"><a class="nav-link {% if status == 'suspended' %}active{% endif %}" href="?status=suspended">Suspended</a></li>
+  <li class="nav-item">
+    <a class="nav-link {% if status == 'pending' %}active{% endif %}"
+       href="?status=pending">Awaiting approval</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if status == 'unverified' %}active{% endif %}"
+       href="?status=unverified">Unverified email</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if status == 'approved' %}active{% endif %}"
+       href="?status=approved">Approved</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if status == 'rejected' %}active{% endif %}"
+       href="?status=rejected">Rejected</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if status == 'suspended' %}active{% endif %}"
+       href="?status=suspended">Suspended</a>
+  </li>
 </ul>
-<div class="card"><div class="table-responsive"><table class="table align-middle mb-0">
-<thead class="table-light"><tr><th>Name</th><th>Email</th><th>District</th><th>Role</th><th>Status</th><th></th></tr></thead><tbody>
-{% for u in page %}<tr><td>{{ u.full_name }}</td><td>{{ u.email }}</td><td>{{ u.district|default:"–" }}</td><td>{{ u.get_role_display }}</td>
-<td>{% if not u.is_active %}<span class="badge text-bg-dark">Suspended</span>{% elif not u.email_verified %}<span class="badge text-bg-secondary">Email unverified</span>{% else %}<span class="badge text-bg-{% if u.approval_status == 'approved' %}success{% elif u.approval_status == 'pending' %}warning{% else %}danger{% endif %}">{{ u.get_approval_status_display }}</span>{% endif %}</td>
-<td class="text-end text-nowrap">
-<form method="post" class="d-inline" action="{% url 'manage:user_action' u.pk 'approve' %}">{% csrf_token %}<input type="hidden" name="next" value="?status={{ status }}">{% if u.approval_status != 'approved' and u.email_verified %}<button class="btn btn-sm btn-success">Approve</button>{% endif %}</form>
-{% if u.approval_status == 'pending' %}<form method="post" class="d-inline" action="{% url 'manage:user_action' u.pk 'reject' %}" data-confirm="Reject this registration?">{% csrf_token %}<button class="btn btn-sm btn-outline-danger">Reject</button></form>{% endif %}
-{% if u.is_active %}<form method="post" class="d-inline" action="{% url 'manage:user_action' u.pk 'suspend' %}" data-confirm="Suspend this account?">{% csrf_token %}<button class="btn btn-sm btn-outline-secondary">Suspend</button></form>
-{% else %}<form method="post" class="d-inline" action="{% url 'manage:user_action' u.pk 'reactivate' %}">{% csrf_token %}<button class="btn btn-sm btn-outline-primary">Reactivate</button></form>{% endif %}
-</td></tr>
-{% empty %}<tr><td colspan="6" class="text-center text-muted py-4">Nothing here.</td></tr>{% endfor %}
-</tbody></table></div></div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>District</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for u in page %}
+        <tr>
+          <td>{{ u.full_name }}</td>
+          <td>{{ u.email }}</td>
+          <td>{{ u.district|default:"–" }}</td>
+          <td>{{ u.get_role_display }}</td>
+
+          <td>
+            {% if not u.is_active %}
+              <span class="badge text-bg-dark">Suspended</span>
+            {% elif not u.email_verified %}
+              <span class="badge text-bg-secondary">Email unverified</span>
+            {% else %}
+              <span class="badge text-bg-{% if u.approval_status == 'approved' %}success{% elif u.approval_status == 'pending' %}warning{% else %}danger{% endif %}">
+                {{ u.get_approval_status_display }}
+              </span>
+            {% endif %}
+          </td>
+
+          <td class="text-end text-nowrap">
+            <!-- Approve -->
+            <form method="post"
+                  class="d-inline"
+                  action="{% url 'manage:user_action' u.pk 'approve' %}">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="?status={{ status }}">
+
+              {% if u.approval_status != 'approved' and u.email_verified %}
+                <button type="submit" class="btn btn-sm btn-success">
+                  Approve
+                </button>
+              {% endif %}
+            </form>
+
+            <!-- Reject -->
+            {% if u.approval_status == 'pending' %}
+            <form method="post"
+                  class="d-inline"
+                  action="{% url 'manage:user_action' u.pk 'reject' %}"
+                  data-confirm="Reject this registration?">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="?status={{ status }}">
+              <button type="submit" class="btn btn-sm btn-outline-danger">
+                Reject
+              </button>
+            </form>
+            {% endif %}
+
+            <!-- Suspend / Reactivate -->
+            {% if u.is_active %}
+            <form method="post"
+                  class="d-inline"
+                  action="{% url 'manage:user_action' u.pk 'suspend' %}"
+                  data-confirm="Suspend this account?">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="?status={{ status }}">
+              <button type="submit" class="btn btn-sm btn-outline-secondary">
+                Suspend
+              </button>
+            </form>
+            {% else %}
+            <form method="post"
+                  class="d-inline"
+                  action="{% url 'manage:user_action' u.pk 'reactivate' %}">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="?status={{ status }}">
+              <button type="submit" class="btn btn-sm btn-outline-primary">
+                Reactivate
+              </button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center text-muted py-4">
+            Nothing here.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}
-{% block scripts %}{% load static %}<script src="{% static 'js/confirm.js' %}"></script>{% endblock %}
+
+{% block scripts %}
+{% load static %}
+<script src="{% static 'js/confirm.js' %}"></script>
+{% endblock %}
