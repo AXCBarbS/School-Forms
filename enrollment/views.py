@@ -1,4 +1,4 @@
-
+```python
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -175,6 +175,30 @@ def _agg_rows(school=None):
             result.append((key, label))
 
     return result
+
+
+def _movement_entry_rows(form):
+    """
+    Build movement input rows for entry.html.
+
+    The template accesses each bound field through the row dictionary,
+    so no custom get_item template filter is required.
+    """
+    rows = []
+
+    for category, title in MOVEMENT_CATEGORIES:
+        rows.append(
+            {
+                "key": category,
+                "title": title,
+                "previous_male": form[f"{category}_previous_male"],
+                "previous_female": form[f"{category}_previous_female"],
+                "monthly_male": form[f"{category}_monthly_male"],
+                "monthly_female": form[f"{category}_monthly_female"],
+            }
+        )
+
+    return rows
 
 
 def _movement_review_rows(record):
@@ -413,6 +437,7 @@ def school_entry(request, school_id):
             "aggs": _agg_rows(school),
             "agg_parts": aggregate_parts,
             "movement_categories": MOVEMENT_CATEGORIES,
+            "movement_rows": _movement_entry_rows(form),
             "year": settings.CURRENT_SCHOOL_YEAR,
             "prefilled": record_state(record) == "prefilled",
         },

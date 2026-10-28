@@ -1,4 +1,4 @@
-
+```django
 {% extends "base.html" %}
 {% load static enr %}
 
@@ -17,9 +17,7 @@
     padding-bottom: 1.5rem;
   }
 
-  .enr-entry-page .enr-intro {
-    margin-bottom: 1.25rem;
-  }
+  .enr-entry-page .enr-intro { margin-bottom: 1.25rem; }
 
   .enr-entry-page .enr-page-title {
     color: var(--deped-blue);
@@ -72,9 +70,7 @@
     color: #d8e5f2 !important;
   }
 
-  .enr-entry-page .table-responsive {
-    width: 100%;
-  }
+  .enr-entry-page .table-responsive { width: 100%; }
 
   .enr-entry-page .enr-table,
   .enr-entry-page .table {
@@ -148,21 +144,9 @@
     white-space: nowrap;
   }
 
-  .enr-entry-page .movement-period {
-    min-width: 245px;
-  }
-
-  .enr-entry-page .movement-input {
-    min-width: 85px;
-  }
-
-  .enr-entry-page .movement-result {
-    background: #f2f6fb;
-  }
-
-  .enr-entry-page #agg-parts {
-    color: inherit;
-  }
+  .enr-entry-page .movement-period { min-width: 245px; }
+  .enr-entry-page .movement-input { min-width: 85px; }
+  .enr-entry-page .movement-result { background: #f2f6fb; }
 
   .enr-entry-page .sticky-actions {
     position: sticky;
@@ -227,14 +211,10 @@
     text-decoration: underline;
   }
 
-  .enr-entry-page .text-danger {
-    font-weight: 500;
-  }
+  .enr-entry-page .text-danger { font-weight: 500; }
 
   @media (max-width: 576px) {
-    .enr-entry-page .card-header {
-      padding: .85rem;
-    }
+    .enr-entry-page .card-header { padding: .85rem; }
 
     .enr-entry-page .enr-table thead th,
     .enr-entry-page .table thead th,
@@ -248,9 +228,7 @@
       padding: .75rem;
     }
 
-    .enr-entry-page .sticky-actions .btn {
-      flex: 1 1 auto;
-    }
+    .enr-entry-page .sticky-actions .btn { flex: 1 1 auto; }
   }
 </style>
 
@@ -281,9 +259,7 @@
     <!-- Existing enrollment sections -->
     {% for code, title, rows in sections %}
       <div class="card mb-4">
-        <div class="card-header fw-semibold">
-          {{ title }}
-        </div>
+        <div class="card-header fw-semibold">{{ title }}</div>
 
         <div class="table-responsive">
           <table class="table table-sm enr-table mb-0">
@@ -295,26 +271,22 @@
                 <th scope="col" class="text-end">Total</th>
               </tr>
             </thead>
-
             <tbody>
               {% for r in rows %}
                 <tr>
                   <td>{{ r.label }}</td>
-
                   <td>
                     {{ r.m }}
                     {% for e in r.m.errors %}
                       <div class="text-danger small text-end">{{ e }}</div>
                     {% endfor %}
                   </td>
-
                   <td>
                     {{ r.f }}
                     {% for e in r.f.errors %}
                       <div class="text-danger small text-end">{{ e }}</div>
                     {% endfor %}
                   </td>
-
                   <td class="total-cell" data-total-for="{{ r.key }}">0</td>
                 </tr>
               {% endfor %}
@@ -324,7 +296,7 @@
       </div>
     {% endfor %}
 
-    <!-- New SF4 movement section -->
+    <!-- SF4 learner movement -->
     <div class="card mb-4">
       <div class="card-header fw-semibold d-flex justify-content-between align-items-center flex-wrap gap-2">
         <span>SF4 Learner Movement</span>
@@ -333,13 +305,12 @@
 
       <div class="p-3">
         <p class="text-muted small mb-3">
-          Enter the previous-month cumulative figures (A) and the figures
-          for the current month (B). The cumulative end-of-month figures
-          (A+B) are calculated automatically.
+          Enter period A and period B figures. Period A+B is calculated
+          automatically as the cumulative figure at the end of the month.
         </p>
 
-        {% for category, title in movement_categories %}
-          <h6 class="fw-bold mt-4 mb-2">{{ title }}</h6>
+        {% for row in movement_rows %}
+          <h6 class="fw-bold mt-4 mb-2">{{ row.title }}</h6>
 
           <div class="table-responsive mb-3">
             <table class="table table-sm enr-table mb-0">
@@ -351,24 +322,60 @@
                   <th scope="col" class="text-end">Total (T)</th>
                 </tr>
               </thead>
-
               <tbody>
                 <tr>
                   <td>A — Cumulative as of Previous Month</td>
                   <td>
-                    {{ form|get_item:category }}
+                    {{ row.previous_male }}
+                    {% for e in row.previous_male.errors %}
+                      <div class="text-danger small">{{ e }}</div>
+                    {% endfor %}
                   </td>
-                  <td></td>
-                  <td class="total-cell" id="movement-{{ category }}-previous-total">0</td>
+                  <td>
+                    {{ row.previous_female }}
+                    {% for e in row.previous_female.errors %}
+                      <div class="text-danger small">{{ e }}</div>
+                    {% endfor %}
+                  </td>
+                  <td class="total-cell movement-result"
+                      id="movement-{{ row.key }}-previous-total">0</td>
+                </tr>
+                <tr>
+                  <td>B — For the Month</td>
+                  <td>
+                    {{ row.monthly_male }}
+                    {% for e in row.monthly_male.errors %}
+                      <div class="text-danger small">{{ e }}</div>
+                    {% endfor %}
+                  </td>
+                  <td>
+                    {{ row.monthly_female }}
+                    {% for e in row.monthly_female.errors %}
+                      <div class="text-danger small">{{ e }}</div>
+                    {% endfor %}
+                  </td>
+                  <td class="total-cell movement-result"
+                      id="movement-{{ row.key }}-monthly-total">0</td>
+                </tr>
+                <tr>
+                  <td>A+B — Cumulative as of End of the Month</td>
+                  <td class="total-cell movement-result"
+                      id="movement-{{ row.key }}-cumulative-male">0</td>
+                  <td class="total-cell movement-result"
+                      id="movement-{{ row.key }}-cumulative-female">0</td>
+                  <td class="total-cell movement-result"
+                      id="movement-{{ row.key }}-cumulative-total">0</td>
                 </tr>
               </tbody>
             </table>
           </div>
+        {% empty %}
+          <p class="text-muted mb-0">No movement categories are configured.</p>
         {% endfor %}
       </div>
     </div>
 
-    <!-- Existing calculated totals -->
+    <!-- Existing calculated enrollment totals -->
     <div class="card mb-4">
       <div class="card-header fw-semibold d-flex justify-content-between align-items-center flex-wrap gap-2">
         <span>Calculated totals</span>
@@ -385,7 +392,6 @@
               <th scope="col" class="text-end">Total</th>
             </tr>
           </thead>
-
           <tbody>
             {% for key, label in aggs %}
               <tr>
