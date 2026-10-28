@@ -46,3 +46,41 @@ class EnrollmentEntry(models.Model):
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["record", "level"], name="one_entry_per_level")]
+
+    
+
+class SF4MovementEntry(models.Model):
+    """Monthly SF4 movement figures: NLPA/dropout and school transfers."""
+
+    record = models.ForeignKey(
+        EnrollmentRecord,
+        on_delete=models.CASCADE,
+        related_name="movement_entries",
+    )
+
+    CATEGORY_CHOICES = [
+        ("dropout", "NLPA / Dropout"),
+        ("transferred_out", "Transferred Out"),
+        ("transferred_in", "Transferred In"),
+    ]
+
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+
+    # A: Cumulative as of Previous Month
+    previous_male = models.PositiveIntegerField(null=True, blank=True)
+    previous_female = models.PositiveIntegerField(null=True, blank=True)
+
+    # B: For the Month
+    monthly_male = models.PositiveIntegerField(null=True, blank=True)
+    monthly_female = models.PositiveIntegerField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["record", "category"],
+                name="one_movement_entry_per_category",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.record} - {self.get_category_display()}"

@@ -18,16 +18,18 @@ from .access import (
     get_school_or_404,
 )
 from .exports import build_export
-from .forms import EnrollmentForm
+from .forms import EnrollmentForm, MOVEMENT_CATEGORIES
 from .models import EnrollmentRecord, RecordStatus
 from .schema import AGGREGATES, LEVELS, SECTION_TITLES
 from .services import (
     STATE_LABELS,
     compute_totals,
     get_or_create_record,
+    movement_values,
     record_state,
     record_values,
     reopen_record,
+    save_movement_values,
     save_values,
     submit_problems,
     submit_record,
@@ -66,7 +68,9 @@ def filter_school_values(school, values):
     """
     permitted = allowed_level_keys(school)
     return {
-        key: values.get(key, (None, None)) if key in permitted else (None, None)
+        key: values.get(key, (None, None))
+        if key in permitted
+        else (None, None)
         for key, *_ in LEVELS
     }
 
@@ -114,54 +118,6 @@ def school_rows(schools):
         )
 
     return rows
-
-
-@login_required
-def dashboard(request):
-    user = request.user
-    schools = accessible_schools(user)
-    district_filter = request.GET.get("district", "")
-
-    if user.is_system_admin and district_filter.isdigit():
-        schools = schools.filter(district_id=int(district_filter))
-
-    query = request.GET.get("q", "").strip()
-
-    if query:
-        schools = schools.filter(
-            Q(name__icontains=query) | Q(school_id__icontains=query)
-        )
-
-    rows = school_rows(schools)
-    counts = {key: 0 for key in STATE_LABELS}
-
-    for row in rows:
-        counts[row["state"]] += 1
-
-    state = request.GET.get("state", "")
-
-    if state in STATE_LABELS:
-        rows = [row for row in rows if row["state"] == state]
-
-    page = Paginator(rows, 50).get_page(request.GET.get("page"))
-
-    context = {
-        "page": page,
-        "q": query,
-        "state": state,
-        "counts": counts,
-        "total": sum(counts.values()),
-        "states": [(key, value[0]) for key, value in STATE_LABELS.items()],
-        "year": settings.CURRENT_SCHOOL_YEAR,
-    }
-
-    if user.is_system_admin:
-        from organization.models import District
-
-        context["districts"] = District.objects.filter(is_active=True)
-        context["district_filter"] = district_filter
-
-    return render(request, "enrollment/dashboard.html", context)
 
 
 def _sections(form=None, totals=None, school=None):
@@ -221,13 +177,139 @@ def _agg_rows(school=None):
     return result
 
 
+def _movement_review_rows(record):
+    """
+    Build review rows for NLPA/dropout and school transfers.
+
+    Period A is the cumulative figure as of the previous month.
+    Period B is the figure for the current month.
+    Period A+B is the cumulative figure at the end of the month.
+    """
+    categories = [
+        ("dropout", "NLPA / Dropout"),
+        ("transferred_out", "Transferred Out"),
+        ("transferred_in", "Transferred In"),
+    ]
+
+    entries = {
+        entry.category: entry
+        for entry in record.movement_entries.all()
+    }
+
+    rows = []
+
+    for category, title in categories:
+        entry = entries.get(category)
+
+        previous_male = entry.previous_male if entry else None
+        previous_female = entry.previous_female if entry else None
+        monthly_male = entry.monthly_male if entry else None
+        monthly_female = entry.monthly_female if entry else None
+
+        previous_total = (
+            previous_male + previous_female
+            if previous_male is not None and previous_female is not None
+            else None
+        )
+
+        monthly_total = (
+            monthly_male + monthly_female
+            if monthly_male is not None and monthly_female is not None
+            else None
+        )
+
+        cumulative_male = (
+            previous_male + monthly_male
+            if previous_male is not None and monthly_male is not None
+            else None
+        )
+
+        cumulative_female = (
+            previous_female + monthly_female
+            if previous_female is not None and monthly_female is not None
+            else None
+        )
+
+        cumulative_total = (
+            cumulative_male + cumulative_female
+            if cumulative_male is not None and cumulative_female is not None
+            else None
+        )
+
+        rows.append(
+            {
+                "key": category,
+                "title": title,
+                "previous_male": previous_male,
+                "previous_female": previous_female,
+                "previous_total": previous_total,
+                "monthly_male": monthly_male,
+                "monthly_female": monthly_female,
+                "monthly_total": monthly_total,
+                "cumulative_male": cumulative_male,
+                "cumulative_female": cumulative_female,
+                "cumulative_total": cumulative_total,
+            }
+        )
+
+    return rows
+
+
 def _invalid_school_type_response(request):
     messages.error(
         request,
         "This school has no valid SF4 school type assigned. "
-        "Please contact your district administrator.",
+        "Please contact the system administrator.",
     )
     return redirect("enrollment:dashboard")
+
+
+@login_required
+def dashboard(request):
+    user = request.user
+    schools = accessible_schools(user)
+    district_filter = request.GET.get("district", "")
+
+    if user.is_system_admin and district_filter.isdigit():
+        schools = schools.filter(district_id=int(district_filter))
+
+    query = request.GET.get("q", "").strip()
+
+    if query:
+        schools = schools.filter(
+            Q(name__icontains=query) | Q(school_id__icontains=query)
+        )
+
+    rows = school_rows(schools)
+    counts = {key: 0 for key in STATE_LABELS}
+
+    for row in rows:
+        counts[row["state"]] += 1
+
+    state = request.GET.get("state", "")
+
+    if state in STATE_LABELS:
+        rows = [row for row in rows if row["state"] == state]
+
+    page = Paginator(rows, 50).get_page(request.GET.get("page"))
+
+    context = {
+        "page": page,
+        "q": query,
+        "state": state,
+        "counts": counts,
+        "total": sum(counts.values()),
+        "states": [(key, value[0]) for key, value in STATE_LABELS.items()],
+        "year": settings.CURRENT_SCHOOL_YEAR,
+    }
+
+    if user.is_system_admin:
+        from organization.models import District
+
+        context["districts"] = District.objects.filter(is_active=True)
+        context["district_filter"] = district_filter
+
+    return render(request, "enrollment/dashboard.html", context)
 
 
 @login_required
@@ -244,7 +326,7 @@ def school_entry(request, school_id):
         messages.info(
             request,
             "This record has been submitted and is locked. "
-            "Ask a district administrator to reopen it.",
+            "Ask the system administrator to reopen it.",
         )
         return redirect("enrollment:review", school_id=school.school_id)
 
@@ -258,8 +340,28 @@ def school_entry(request, school_id):
                 "school type. No changes were saved.",
             )
         elif form.is_valid():
-            values = filter_school_values(school, form.values())
-            save_values(record, values, request.user)
+            all_values = form.values()
+
+            # Save the existing enrollment levels only.
+            level_keys = {level[0] for level in LEVELS}
+            enrollment_values = {
+                key: value
+                for key, value in all_values.items()
+                if key in level_keys
+            }
+            enrollment_values = filter_school_values(
+                school, enrollment_values
+            )
+
+            save_values(record, enrollment_values, request.user)
+
+            # Save NLPA/Dropout and transfer figures.
+            movement_data = {
+                key: value
+                for key, value in all_values.items()
+                if key not in level_keys
+            }
+            save_movement_values(record, movement_data)
 
             log(
                 request,
@@ -284,8 +386,15 @@ def school_entry(request, school_id):
         else:
             messages.error(request, "Please correct the highlighted fields.")
     else:
-        values = filter_school_values(school, record_values(record))
-        form = EnrollmentForm(initial=EnrollmentForm.initial_from(values))
+        # Load existing enrollment and movement figures.
+        values = filter_school_values(
+            school, record_values(record)
+        )
+        values.update(movement_values(record))
+
+        form = EnrollmentForm(
+            initial=EnrollmentForm.initial_from(values)
+        )
 
     permitted_levels = allowed_level_keys(school)
     aggregate_parts = {
@@ -303,6 +412,7 @@ def school_entry(request, school_id):
             "sections": _sections(form=form, school=school),
             "aggs": _agg_rows(school),
             "agg_parts": aggregate_parts,
+            "movement_categories": MOVEMENT_CATEGORIES,
             "year": settings.CURRENT_SCHOOL_YEAR,
             "prefilled": record_state(record) == "prefilled",
         },
@@ -320,6 +430,7 @@ def school_review(request, school_id):
     values = filter_school_values(school, record_values(record))
     totals = compute_totals(values)
     state = record_state(record)
+    movement_rows = _movement_review_rows(record)
 
     return render(
         request,
@@ -331,6 +442,7 @@ def school_review(request, school_id):
             "totals": totals,
             "sections": _sections(totals=totals, school=school),
             "aggs": _agg_rows(school),
+            "movement_rows": movement_rows,
             "problems": submit_problems(values),
             "year": settings.CURRENT_SCHOOL_YEAR,
             "can_reopen": can_manage_district(

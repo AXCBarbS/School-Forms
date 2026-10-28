@@ -109,6 +109,21 @@
     font-variant-numeric: tabular-nums;
   }
 
+  .enr-review-page .movement-period {
+    min-width: 220px;
+    font-weight: 500;
+  }
+
+  .enr-review-page .movement-category {
+    min-width: 145px;
+    vertical-align: middle;
+    background: #f7f9fc;
+  }
+
+  .enr-review-page .movement-cumulative {
+    background: #f0f6fd !important;
+  }
+
   .enr-review-page .totals-card {
     border-color: #cbd9e8;
   }
@@ -254,6 +269,7 @@
 
   {% include "enrollment/_school_header.html" %}
 
+  <!-- Submission status -->
   <div class="review-status">
     <span class="status-label">Submission status</span>
 
@@ -268,6 +284,7 @@
     {% endif %}
   </div>
 
+  <!-- Enrollment sections -->
   {% for code, title, rows in sections %}
     <div class="card mb-4">
       <div class="card-header">
@@ -300,6 +317,86 @@
     </div>
   {% endfor %}
 
+  <!-- SF4 movement figures -->
+  <div class="card mb-4">
+    <div class="card-header">
+      SF4 Learner Movement
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-sm mb-0">
+        <thead>
+          <tr>
+            <th scope="col">Category</th>
+            <th scope="col">Period</th>
+            <th scope="col" class="text-end">Male</th>
+            <th scope="col" class="text-end">Female</th>
+            <th scope="col" class="text-end">Total</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for r in movement_rows %}
+            <tr>
+              <td class="movement-category" rowspan="3">
+                {{ r.title }}
+              </td>
+              <td class="movement-period">
+                A — Cumulative as of Previous Month
+              </td>
+              <td class="text-end">
+                {{ r.previous_male|default_if_none:"—" }}
+              </td>
+              <td class="text-end">
+                {{ r.previous_female|default_if_none:"—" }}
+              </td>
+              <td class="text-end fw-semibold">
+                {{ r.previous_total|default_if_none:"—" }}
+              </td>
+            </tr>
+
+            <tr>
+              <td class="movement-period">
+                B — For the Month
+              </td>
+              <td class="text-end">
+                {{ r.monthly_male|default_if_none:"—" }}
+              </td>
+              <td class="text-end">
+                {{ r.monthly_female|default_if_none:"—" }}
+              </td>
+              <td class="text-end fw-semibold">
+                {{ r.monthly_total|default_if_none:"—" }}
+              </td>
+            </tr>
+
+            <tr class="movement-cumulative">
+              <td class="movement-period">
+                A+B — Cumulative as of End of the Month
+              </td>
+              <td class="text-end">
+                {{ r.cumulative_male|default_if_none:"—" }}
+              </td>
+              <td class="text-end">
+                {{ r.cumulative_female|default_if_none:"—" }}
+              </td>
+              <td class="text-end fw-semibold">
+                {{ r.cumulative_total|default_if_none:"—" }}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5" class="text-center text-muted py-4">
+                No movement figures are available.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Existing calculated enrollment totals -->
   <div class="card totals-card mb-4">
     <div class="card-header">
       Calculated Totals
@@ -332,10 +429,12 @@
     </div>
   </div>
 
+  <!-- Submission validation messages -->
   {% if problems and record.status != 'submitted' %}
     <div class="alert alert-warning mb-4" role="alert">
       <strong>Before submitting</strong>
       Please resolve the following items before submitting this record.
+
       <ul class="mb-0 mt-2">
         {% for p in problems %}
           <li>{{ p }}</li>
@@ -344,31 +443,41 @@
     </div>
   {% endif %}
 
+  <!-- Existing review actions -->
   <div class="review-actions">
     {% if record.status != 'submitted' %}
-      <a class="btn btn-outline-primary"
-         href="{% url 'enrollment:entry' school.school_id %}">
+      <a
+        class="btn btn-outline-primary"
+        href="{% url 'enrollment:entry' school.school_id %}"
+      >
         Edit
       </a>
 
-      <a class="btn btn-success {% if problems %}disabled{% endif %}"
-         href="{% url 'enrollment:submit' school.school_id %}">
+      <a
+        class="btn btn-success {% if problems %}disabled{% endif %}"
+        href="{% url 'enrollment:submit' school.school_id %}"
+      >
         Submit…
       </a>
 
     {% elif can_reopen %}
-      <form method="post"
-            action="{% url 'enrollment:reopen' school.school_id %}"
-            data-confirm="Reopen this submitted record for editing?">
+      <form
+        method="post"
+        action="{% url 'enrollment:reopen' school.school_id %}"
+        data-confirm="Reopen this submitted record for editing?"
+      >
         {% csrf_token %}
+
         <button type="submit" class="btn btn-outline-danger">
           Reopen for editing
         </button>
       </form>
     {% endif %}
 
-    <a class="btn btn-link"
-       href="{% url 'enrollment:dashboard' %}">
+    <a
+      class="btn btn-link"
+      href="{% url 'enrollment:dashboard' %}"
+    >
       Back to schools
     </a>
   </div>
@@ -380,4 +489,3 @@
 {% load static %}
 <script src="{% static 'js/confirm.js' %}"></script>
 {% endblock %}
-```

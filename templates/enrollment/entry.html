@@ -148,6 +148,18 @@
     white-space: nowrap;
   }
 
+  .enr-entry-page .movement-period {
+    min-width: 245px;
+  }
+
+  .enr-entry-page .movement-input {
+    min-width: 85px;
+  }
+
+  .enr-entry-page .movement-result {
+    background: #f2f6fb;
+  }
+
   .enr-entry-page #agg-parts {
     color: inherit;
   }
@@ -266,6 +278,7 @@
   <form method="post" novalidate>
     {% csrf_token %}
 
+    <!-- Existing enrollment sections -->
     {% for code, title, rows in sections %}
       <div class="card mb-4">
         <div class="card-header fw-semibold">
@@ -311,6 +324,51 @@
       </div>
     {% endfor %}
 
+    <!-- New SF4 movement section -->
+    <div class="card mb-4">
+      <div class="card-header fw-semibold d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span>SF4 Learner Movement</span>
+        <span class="text-muted fw-normal small">Automatic calculations</span>
+      </div>
+
+      <div class="p-3">
+        <p class="text-muted small mb-3">
+          Enter the previous-month cumulative figures (A) and the figures
+          for the current month (B). The cumulative end-of-month figures
+          (A+B) are calculated automatically.
+        </p>
+
+        {% for category, title in movement_categories %}
+          <h6 class="fw-bold mt-4 mb-2">{{ title }}</h6>
+
+          <div class="table-responsive mb-3">
+            <table class="table table-sm enr-table mb-0">
+              <thead>
+                <tr>
+                  <th scope="col" class="movement-period">Reporting period</th>
+                  <th scope="col" class="text-end">Male (M)</th>
+                  <th scope="col" class="text-end">Female (F)</th>
+                  <th scope="col" class="text-end">Total (T)</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr>
+                  <td>A — Cumulative as of Previous Month</td>
+                  <td>
+                    {{ form|get_item:category }}
+                  </td>
+                  <td></td>
+                  <td class="total-cell" id="movement-{{ category }}-previous-total">0</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Existing calculated totals -->
     <div class="card mb-4">
       <div class="card-header fw-semibold d-flex justify-content-between align-items-center flex-wrap gap-2">
         <span>Calculated totals</span>
@@ -342,6 +400,7 @@
       </div>
     </div>
 
+    <!-- Existing action buttons -->
     <div class="sticky-actions d-flex gap-2">
       <button type="submit" class="btn btn-outline-primary" name="action" value="save">
         Save draft
@@ -365,4 +424,3 @@
 {% block scripts %}
 <script src="{% static 'js/entry.js' %}"></script>
 {% endblock %}
-```

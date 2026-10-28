@@ -2,7 +2,13 @@ from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
-from .models import EnrollmentEntry, EnrollmentRecord, RecordStatus, RecordSource
+from .models import (
+    EnrollmentEntry,
+    EnrollmentRecord,
+    SF4MovementEntry,
+    RecordStatus,
+    RecordSource,
+)
 from .schema import AGGREGATES, LEVEL_KEYS, LEVEL_LABEL
 
 
@@ -97,3 +103,41 @@ def record_state(record):
     if record.source == RecordSource.EXCEL_IMPORT:
         return "prefilled"
     return "in_progress"
+
+MOVEMENT_CATEGORIES = ("dropout", "transferred_out", "transferred_in")
+MOVEMENT_PERIODS = ("previous", "monthly")
+MOVEMENT_SEXES = ("male", "female")
+
+
+def movement_values(record):
+    """Load saved SF4 movement figures into the enrollment form."""
+    values = {}
+
+    if record is None:
+        return values
+
+    for entry in record.movement_entries.all():
+        for period in MOVEMENT_PERIODS:
+            for sex in MOVEMENT_SEXES:
+                field_name = f"{entry.category}_{period}_{sex}"
+                values[field_name] = getattr(entry, f"{period}_{sex}")
+
+    return values
+
+
+@transaction.atomic
+def save_movement_values(record, values):
+    """Save all SF4 movement figures together."""
+    for category in MOVEMENT_CATEGORIES:
+        defaults = {}
+
+        for period in MOVEMENT_PERIODS:
+            for sex in MOVEMENT_SEXES:
+                field_name = f"{category}_{period}_{sex}"
+                defaults[f"{period}_{sex}"] = values.get(field_name)
+
+        SF4MovementEntry.objects.update_or_create(
+            record=record,
+            category=category,
+            defaults=defaults,
+        )

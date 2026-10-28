@@ -1,20 +1,21 @@
+
 (function () {
   "use strict";
 
   const partsElement = document.getElementById("agg-parts");
 
-  // This script may also be loaded on a page without enrollment totals.
-  if (!partsElement) {
-    return;
-  }
+  let parts = {};
 
-  let parts;
-
-  try {
-    parts = JSON.parse(partsElement.textContent);
-  } catch (error) {
-    console.error("Unable to read enrollment aggregate definitions.", error);
-    return;
+  // Read enrollment aggregate definitions when available.
+  if (partsElement) {
+    try {
+      parts = JSON.parse(partsElement.textContent);
+    } catch (error) {
+      console.error(
+        "Unable to read enrollment aggregate definitions.",
+        error
+      );
+    }
   }
 
   function numberValue(value) {
@@ -22,7 +23,11 @@
     return Number.isNaN(parsed) || parsed < 0 ? 0 : parsed;
   }
 
-  function read(level, sex) {
+  // --------------------------------------------------
+  // ENROLLMENT TOTALS
+  // --------------------------------------------------
+
+  function readEnrollment(level, sex) {
     const input = document.querySelector(
       `input[data-level="${level}"][data-sex="${sex}"]`
     );
@@ -30,20 +35,18 @@
     return input ? numberValue(input.value) : 0;
   }
 
-  function recalculate() {
+  function recalculateEnrollment() {
     const levels = {};
 
-    // Calculate totals for the enrollment levels displayed on this page.
     document.querySelectorAll("[data-total-for]").forEach((cell) => {
       const level = cell.dataset.totalFor;
-      const male = read(level, "m");
-      const female = read(level, "f");
+      const male = readEnrollment(level, "m");
+      const female = readEnrollment(level, "f");
 
       levels[level] = [male, female];
       cell.textContent = male + female;
     });
 
-    // Calculate aggregates safely, including when a level is not displayed.
     Object.entries(parts).forEach(([key, levelKeys]) => {
       let male = 0;
       let female = 0;
@@ -65,12 +68,89 @@
     });
   }
 
-  // Recalculate whenever an enrollment value changes.
+  // --------------------------------------------------
+  // SF4 MOVEMENT TOTALS
+  // --------------------------------------------------
+
+  function readMovement(category, period, sex) {
+    const input = document.querySelector(
+      `input[name="${category}_${period}_${sex}"]`
+    );
+
+    return input ? numberValue(input.value) : 0;
+  }
+
+  function setMovementCell(id, value) {
+    const cell = document.getElementById(id);
+
+    if (cell) {
+      cell.textContent = value;
+    }
+  }
+
+  function recalculateMovements() {
+    const categories = [
+      "dropout",
+      "transferred_out",
+      "transferred_in"
+    ];
+
+    categories.forEach((category) => {
+      // A: Cumulative as of Previous Month
+      const previousMale = readMovement(category, "previous", "male");
+      const previousFemale = readMovement(category, "previous", "female");
+      const previousTotal = previousMale + previousFemale;
+
+      setMovementCell(
+        `movement-${category}-previous-total`,
+        previousTotal
+      );
+
+      // B: For the Month
+      const monthlyMale = readMovement(category, "monthly", "male");
+      const monthlyFemale = readMovement(category, "monthly", "female");
+      const monthlyTotal = monthlyMale + monthlyFemale;
+
+      setMovementCell(
+        `movement-${category}-monthly-total`,
+        monthlyTotal
+      );
+
+      // A+B: Cumulative as of End of the Month
+      const cumulativeMale = previousMale + monthlyMale;
+      const cumulativeFemale = previousFemale + monthlyFemale;
+      const cumulativeTotal = cumulativeMale + cumulativeFemale;
+
+      setMovementCell(
+        `movement-${category}-cumulative-male`,
+        cumulativeMale
+      );
+
+      setMovementCell(
+        `movement-${category}-cumulative-female`,
+        cumulativeFemale
+      );
+
+      setMovementCell(
+        `movement-${category}-cumulative-total`,
+        cumulativeTotal
+      );
+    });
+  }
+
+  // --------------------------------------------------
+  // EVENT LISTENERS
+  // --------------------------------------------------
+
   document.querySelectorAll("input.enr").forEach((input) => {
-    input.addEventListener("input", recalculate);
+    input.addEventListener("input", recalculateEnrollment);
   });
 
-  // Preserve confirmation dialogs for forms that request them.
+  document.querySelectorAll("input.movement-input").forEach((input) => {
+    input.addEventListener("input", recalculateMovements);
+  });
+
+  // Keep confirmation dialogs for forms that request them.
   document.querySelectorAll("form[data-confirm]").forEach((form) => {
     form.addEventListener("submit", (event) => {
       if (!window.confirm(form.dataset.confirm)) {
@@ -79,5 +159,7 @@
     });
   });
 
-  recalculate();
+  // Calculate initial values when the page loads.
+  recalculateEnrollment();
+  recalculateMovements();
 })();
