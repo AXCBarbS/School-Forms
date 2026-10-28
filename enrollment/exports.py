@@ -13,6 +13,7 @@ from .schema import (
     LEVEL_LABEL,
 )
 from .services import compute_totals, record_state, STATE_LABELS
+from .models import EnrollmentRecord, SF4MovementEntry
 
 
 MOVEMENT_CATEGORIES = [
@@ -28,33 +29,76 @@ MOVEMENT_PERIODS = [
 ]
 
 
+
 def movement_totals(record):
-    """Return M, F, T values for all SF4 movement reporting periods."""
+    """
+    Aggregate movement figures across grade levels.
+
+    For each category, use grade-level entries when any contain data.
+    Otherwise, fall back to the legacy unallocated total.
+    """
     results = {}
 
-    saved_entries = (
-        {
-            entry.category: entry
-            for entry in record.movement_entries.all()
-        }
-        if record
-        else {}
-    )
+    if record:
+        entries = list(record.movement_entries.all())
+    else:
+        entries = []
+
+    legacy_level = SF4MovementEntry.LEGACY_LEVEL
 
     for category, _label in MOVEMENT_CATEGORIES:
-        entry = saved_entries.get(category)
+        category_entries = [
+            entry
+            for entry in entries
+            if entry.category == category
+        ]
 
-        previous_male = (
-            entry.previous_male or 0 if entry else 0
+        grade_entries = [
+            entry
+            for entry in category_entries
+            if entry.level != legacy_level
+        ]
+
+        legacy_entries = [
+            entry
+            for entry in category_entries
+            if entry.level == legacy_level
+        ]
+
+        def has_data(entry):
+            return any(
+                getattr(entry, field) is not None
+                for field in (
+                    "previous_male",
+                    "previous_female",
+                    "monthly_male",
+                    "monthly_female",
+                )
+            )
+
+        populated_grade_entries = [
+            entry for entry in grade_entries if has_data(entry)
+        ]
+
+        # Never combine grade-level figures with the legacy total.
+        if populated_grade_entries:
+            selected_entries = populated_grade_entries
+        else:
+            selected_entries = [
+                entry for entry in legacy_entries if has_data(entry)
+            ]
+
+        previous_male = sum(
+            entry.previous_male or 0 for entry in selected_entries
         )
-        previous_female = (
-            entry.previous_female or 0 if entry else 0
+        previous_female = sum(
+            entry.previous_female or 0 for entry in selected_entries
         )
-        monthly_male = (
-            entry.monthly_male or 0 if entry else 0
+        monthly_male = sum(
+            entry.monthly_male or 0 for entry in selected_entries
         )
-        monthly_female = (
-            entry.monthly_female or 0 if entry else 0
+        monthly_female = sum(
+            entry.monthly_female or 0 for entry in selected_entries
         )
 
         cumulative_male = previous_male + monthly_male
@@ -79,6 +123,7 @@ def movement_totals(record):
         )
 
     return results
+
 
 
 def build_export(schools):

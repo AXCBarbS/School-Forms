@@ -74,20 +74,31 @@ def filter_school_values(school, values):
     }
 
 
+
 def has_unauthorized_posted_values(request, school):
-    """Reject non-empty POST values for levels this school cannot access."""
+    """Reject posted enrollment or movement values for unauthorized levels."""
     permitted = allowed_level_keys(school)
 
     for key, *_ in LEVELS:
         if key in permitted:
             continue
 
+        # Enrollment fields
         for suffix in ("m", "f"):
             field_name = f"{key}_{suffix}"
             if request.POST.get(field_name, "").strip():
                 return True
 
+        # Movement fields
+        for category, _category_label in MOVEMENT_CATEGORIES:
+            for period in ("previous", "monthly"):
+                for sex in ("male", "female"):
+                    field_name = f"{key}_{category}_{period}_{sex}"
+                    if request.POST.get(field_name, "").strip():
+                        return True
+
     return False
+
 
 
 def school_rows(schools):
@@ -176,107 +187,161 @@ def _agg_rows(school=None):
     return result
 
 
-def _movement_entry_rows(form):
-    """
-    Build movement input rows for entry.html.
 
-    The template accesses each bound field through the row dictionary,
-    so no custom get_item template filter is required.
-    """
+
+def _movement_entry_rows(form, permitted_levels=None):
+    """Build inline movement field objects for each permitted grade level."""
+    from .schema import LEVELS
+
+    if permitted_levels is None:
+        permitted_levels = {level[0] for level in LEVELS}
+
     rows = []
 
-    for category, title in MOVEMENT_CATEGORIES:
-        rows.append(
-            {
-                "key": category,
-                "title": title,
-                "previous_male": form[f"{category}_previous_male"],
-                "previous_female": form[f"{category}_previous_female"],
-                "monthly_male": form[f"{category}_monthly_male"],
-                "monthly_female": form[f"{category}_monthly_female"],
+    for level, level_label, section, _column in LEVELS:
+        if level not in permitted_levels:
+            continue
+
+        row = {
+            "key": level,
+            "level": level,
+            "label": level_label,
+            "section": section,
+            "enrollment_m": form[f"{level}_m"],
+            "enrollment_f": form[f"{level}_f"],
+            "enrollment_key": level,
+            "movements": [],
+        }
+
+        for category, category_label in MOVEMENT_CATEGORIES:
+            movement = {
+                "category": category,
+                "label": category_label,
+                "previous_male": form[
+                    f"{level}_{category}_previous_male"
+                ],
+                "previous_female": form[
+                    f"{level}_{category}_previous_female"
+                ],
+                "monthly_male": form[
+                    f"{level}_{category}_monthly_male"
+                ],
+                "monthly_female": form[
+                    f"{level}_{category}_monthly_female"
+                ],
             }
-        )
+            row["movements"].append(movement)
+
+        rows.append(row)
 
     return rows
 
 
-def _movement_review_rows(record):
-    """
-    Build review rows for NLPA/dropout and school transfers.
 
-    Period A is the cumulative figure as of the previous month.
-    Period B is the figure for the current month.
-    Period A+B is the cumulative figure at the end of the month.
-    """
+
+def _movement_review_rows(record, permitted_levels=None):
+    """Build grade-level movement rows and preserve legacy totals."""
+    from .schema import LEVELS
+    from .models import SF4MovementEntry
+
     categories = [
         ("dropout", "NLPA / Dropout"),
         ("transferred_out", "Transferred Out"),
         ("transferred_in", "Transferred In"),
     ]
 
-    entries = {
-        entry.category: entry
-        for entry in record.movement_entries.all()
-    }
+    if permitted_levels is None:
+        permitted_levels = {level[0] for level in LEVELS}
 
+    entries = list(record.movement_entries.all()) if record else []
     rows = []
 
-    for category, title in categories:
-        entry = entries.get(category)
-
+    def make_row(category, title, entry, key):
         previous_male = entry.previous_male if entry else None
         previous_female = entry.previous_female if entry else None
         monthly_male = entry.monthly_male if entry else None
         monthly_female = entry.monthly_female if entry else None
-
-        previous_total = (
-            previous_male + previous_female
-            if previous_male is not None and previous_female is not None
-            else None
-        )
-
-        monthly_total = (
-            monthly_male + monthly_female
-            if monthly_male is not None and monthly_female is not None
-            else None
-        )
 
         cumulative_male = (
             previous_male + monthly_male
             if previous_male is not None and monthly_male is not None
             else None
         )
-
         cumulative_female = (
             previous_female + monthly_female
             if previous_female is not None and monthly_female is not None
             else None
         )
 
-        cumulative_total = (
-            cumulative_male + cumulative_female
-            if cumulative_male is not None and cumulative_female is not None
-            else None
-        )
+        return {
+            "key": key,
+            "category": category,
+            "title": title,
+            "previous_male": previous_male,
+            "previous_female": previous_female,
+            "previous_total": (
+                previous_male + previous_female
+                if previous_male is not None and previous_female is not None
+                else None
+            ),
+            "monthly_male": monthly_male,
+            "monthly_female": monthly_female,
+            "monthly_total": (
+                monthly_male + monthly_female
+                if monthly_male is not None and monthly_female is not None
+                else None
+            ),
+            "cumulative_male": cumulative_male,
+            "cumulative_female": cumulative_female,
+            "cumulative_total": (
+                cumulative_male + cumulative_female
+                if cumulative_male is not None and cumulative_female is not None
+                else None
+            ),
+        }
 
-        rows.append(
-            {
-                "key": category,
-                "title": title,
-                "previous_male": previous_male,
-                "previous_female": previous_female,
-                "previous_total": previous_total,
-                "monthly_male": monthly_male,
-                "monthly_female": monthly_female,
-                "monthly_total": monthly_total,
-                "cumulative_male": cumulative_male,
-                "cumulative_female": cumulative_female,
-                "cumulative_total": cumulative_total,
-            }
+    for level, level_label, _section, _column in LEVELS:
+        if level not in permitted_levels:
+            continue
+
+        for category, category_label in categories:
+            entry = next(
+                (
+                    item for item in entries
+                    if item.level == level and item.category == category
+                ),
+                None,
+            )
+            rows.append(
+                make_row(
+                    category,
+                    f"{level_label} — {category_label}",
+                    entry,
+                    f"{level}-{category}",
+                )
+            )
+
+    # Show historical entries that have not been allocated to grade levels.
+    for category, category_label in categories:
+        legacy_entry = next(
+            (
+                item for item in entries
+                if item.level == SF4MovementEntry.LEGACY_LEVEL
+                and item.category == category
+            ),
+            None,
         )
+        if legacy_entry:
+            rows.append(
+                make_row(
+                    category,
+                    f"Legacy total — {category_label} (unallocated)",
+                    legacy_entry,
+                    f"legacy-{category}",
+                )
+            )
 
     return rows
-
 
 def _invalid_school_type_response(request):
     messages.error(
@@ -436,7 +501,10 @@ def school_entry(request, school_id):
             "aggs": _agg_rows(school),
             "agg_parts": aggregate_parts,
             "movement_categories": MOVEMENT_CATEGORIES,
-            "movement_rows": _movement_entry_rows(form),
+            "movement_rows": _movement_entry_rows(
+            form,
+            permitted_levels,
+            ),
             "year": settings.CURRENT_SCHOOL_YEAR,
             "prefilled": record_state(record) == "prefilled",
         },
@@ -454,7 +522,10 @@ def school_review(request, school_id):
     values = filter_school_values(school, record_values(record))
     totals = compute_totals(values)
     state = record_state(record)
-    movement_rows = _movement_review_rows(record)
+    movement_rows = _movement_review_rows(
+                    record,
+    allowed_level_keys(school),
+)
 
     return render(
         request,

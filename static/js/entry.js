@@ -3,10 +3,12 @@
   "use strict";
 
   const partsElement = document.getElementById("agg-parts");
-
   let parts = {};
 
-  // Read enrollment aggregate definitions when available.
+  // --------------------------------------------------
+  // ENROLLMENT AGGREGATE DEFINITIONS
+  // --------------------------------------------------
+
   if (partsElement) {
     try {
       parts = JSON.parse(partsElement.textContent);
@@ -25,6 +27,7 @@
 
   // --------------------------------------------------
   // ENROLLMENT TOTALS
+  // Existing enrollment behavior is preserved.
   // --------------------------------------------------
 
   function readEnrollment(level, sex) {
@@ -62,19 +65,31 @@
       const femaleCell = document.getElementById(`agg-${key}-f`);
       const totalCell = document.getElementById(`agg-${key}-t`);
 
-      if (maleCell) maleCell.textContent = male;
-      if (femaleCell) femaleCell.textContent = female;
-      if (totalCell) totalCell.textContent = male + female;
+      if (maleCell) {
+        maleCell.textContent = male;
+      }
+
+      if (femaleCell) {
+        femaleCell.textContent = female;
+      }
+
+      if (totalCell) {
+        totalCell.textContent = male + female;
+      }
     });
   }
 
   // --------------------------------------------------
-  // SF4 MOVEMENT TOTALS
+  // SF4 MOVEMENT — PER GRADE LEVEL AND CATEGORY
   // --------------------------------------------------
 
-  function readMovement(category, period, sex) {
+  function readMovement(level, category, period, sex) {
     const input = document.querySelector(
-      `input[name="${category}_${period}_${sex}"]`
+      `input.movement-input` +
+      `[data-level="${level}"]` +
+      `[data-category="${category}"]` +
+      `[data-period="${period}"]` +
+      `[data-sex="${sex}"]`
     );
 
     return input ? numberValue(input.value) : 0;
@@ -89,50 +104,84 @@
   }
 
   function recalculateMovements() {
-    const categories = [
-      "dropout",
-      "transferred_out",
-      "transferred_in"
-    ];
+    const inputs = document.querySelectorAll(
+      "input.movement-input[data-level][data-category]"
+    );
 
-    categories.forEach((category) => {
-      // A: Cumulative as of Previous Month
-      const previousMale = readMovement(category, "previous", "male");
-      const previousFemale = readMovement(category, "previous", "female");
-      const previousTotal = previousMale + previousFemale;
+    const pairs = new Set();
 
-      setMovementCell(
-        `movement-${category}-previous-total`,
-        previousTotal
+    inputs.forEach((input) => {
+      const level = input.dataset.level;
+      const category = input.dataset.category;
+
+      if (level && category) {
+        pairs.add(`${level}|${category}`);
+      }
+    });
+
+    pairs.forEach((pair) => {
+      const separator = pair.indexOf("|");
+      const level = pair.slice(0, separator);
+      const category = pair.slice(separator + 1);
+      const key = `${level}-${category}`;
+
+      // A — Cumulative as of Previous Month
+      const previousMale = readMovement(
+        level,
+        category,
+        "previous",
+        "male"
       );
 
-      // B: For the Month
-      const monthlyMale = readMovement(category, "monthly", "male");
-      const monthlyFemale = readMovement(category, "monthly", "female");
-      const monthlyTotal = monthlyMale + monthlyFemale;
-
-      setMovementCell(
-        `movement-${category}-monthly-total`,
-        monthlyTotal
+      const previousFemale = readMovement(
+        level,
+        category,
+        "previous",
+        "female"
       );
 
-      // A+B: Cumulative as of End of the Month
+      setMovementCell(
+        `movement-${key}-previous-total`,
+        previousMale + previousFemale
+      );
+
+      // B — For the Month
+      const monthlyMale = readMovement(
+        level,
+        category,
+        "monthly",
+        "male"
+      );
+
+      const monthlyFemale = readMovement(
+        level,
+        category,
+        "monthly",
+        "female"
+      );
+
+      setMovementCell(
+        `movement-${key}-monthly-total`,
+        monthlyMale + monthlyFemale
+      );
+
+      // A+B — Cumulative as of End of the Month
       const cumulativeMale = previousMale + monthlyMale;
       const cumulativeFemale = previousFemale + monthlyFemale;
       const cumulativeTotal = cumulativeMale + cumulativeFemale;
 
       setMovementCell(
-        `movement-${category}-cumulative-male`,
+        `movement-${key}-cumulative-male`,
         cumulativeMale
       );
 
       setMovementCell(
-        `movement-${category}-cumulative-female`,
+        `movement-${key}-cumulative-female`,
         cumulativeFemale
       );
 
       setMovementCell(
-        `movement-${category}-cumulative-total`,
+        `movement-${key}-cumulative-total`,
         cumulativeTotal
       );
     });
@@ -150,7 +199,7 @@
     input.addEventListener("input", recalculateMovements);
   });
 
-  // Keep confirmation dialogs for forms that request them.
+  // Preserve confirmation dialogs on existing forms.
   document.querySelectorAll("form[data-confirm]").forEach((form) => {
     form.addEventListener("submit", (event) => {
       if (!window.confirm(form.dataset.confirm)) {
@@ -159,7 +208,10 @@
     });
   });
 
-  // Calculate initial values when the page loads.
+  // --------------------------------------------------
+  // INITIAL CALCULATIONS
+  // --------------------------------------------------
+
   recalculateEnrollment();
   recalculateMovements();
 })();

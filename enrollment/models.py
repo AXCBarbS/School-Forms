@@ -49,8 +49,11 @@ class EnrollmentEntry(models.Model):
 
     
 
+
 class SF4MovementEntry(models.Model):
-    """Monthly SF4 movement figures: NLPA/dropout and school transfers."""
+    """SF4 movement figures for one school record, level, and category."""
+
+    LEGACY_LEVEL = "legacy_total"
 
     record = models.ForeignKey(
         EnrollmentRecord,
@@ -64,7 +67,13 @@ class SF4MovementEntry(models.Model):
         ("transferred_in", "Transferred In"),
     ]
 
+    LEVEL_CHOICES = [
+        (key, label)
+        for key, label, _section, _column in LEVELS
+    ] + [(LEGACY_LEVEL, "Legacy total — needs grade allocation")]
+
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    level = models.CharField(max_length=20, choices=LEVEL_CHOICES)
 
     # A: Cumulative as of Previous Month
     previous_male = models.PositiveIntegerField(null=True, blank=True)
@@ -77,10 +86,13 @@ class SF4MovementEntry(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["record", "category"],
-                name="one_movement_entry_per_category",
+                fields=["record", "level", "category"],
+                name="one_movement_entry_per_level_category",
             )
         ]
 
     def __str__(self):
-        return f"{self.record} - {self.get_category_display()}"
+        return (
+            f"{self.record} - {self.level} - "
+            f"{self.get_category_display()}"
+        )

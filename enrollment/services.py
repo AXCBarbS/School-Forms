@@ -109,17 +109,27 @@ MOVEMENT_PERIODS = ("previous", "monthly")
 MOVEMENT_SEXES = ("male", "female")
 
 
+
+MOVEMENT_CATEGORIES = ("dropout", "transferred_out", "transferred_in")
+MOVEMENT_PERIODS = ("previous", "monthly")
+MOVEMENT_SEXES = ("male", "female")
+
+
 def movement_values(record):
-    """Load saved SF4 movement figures into the enrollment form."""
+    """Load per-level movement figures into the enrollment form."""
     values = {}
 
     if record is None:
         return values
 
-    for entry in record.movement_entries.all():
+    for entry in record.movement_entries.exclude(
+        level=SF4MovementEntry.LEGACY_LEVEL
+    ):
         for period in MOVEMENT_PERIODS:
             for sex in MOVEMENT_SEXES:
-                field_name = f"{entry.category}_{period}_{sex}"
+                field_name = (
+                    f"{entry.level}_{entry.category}_{period}_{sex}"
+                )
                 values[field_name] = getattr(entry, f"{period}_{sex}")
 
     return values
@@ -127,17 +137,21 @@ def movement_values(record):
 
 @transaction.atomic
 def save_movement_values(record, values):
-    """Save all SF4 movement figures together."""
-    for category in MOVEMENT_CATEGORIES:
-        defaults = {}
+    """Save per-level movement figures without deleting legacy totals."""
+    from .schema import LEVEL_KEYS
 
-        for period in MOVEMENT_PERIODS:
-            for sex in MOVEMENT_SEXES:
-                field_name = f"{category}_{period}_{sex}"
-                defaults[f"{period}_{sex}"] = values.get(field_name)
+    for level in LEVEL_KEYS:
+        for category in MOVEMENT_CATEGORIES:
+            defaults = {}
 
-        SF4MovementEntry.objects.update_or_create(
-            record=record,
-            category=category,
-            defaults=defaults,
-        )
+            for period in MOVEMENT_PERIODS:
+                for sex in MOVEMENT_SEXES:
+                    field_name = f"{level}_{category}_{period}_{sex}"
+                    defaults[f"{period}_{sex}"] = values.get(field_name)
+
+            SF4MovementEntry.objects.update_or_create(
+                record=record,
+                level=level,
+                category=category,
+                defaults=defaults,
+            )

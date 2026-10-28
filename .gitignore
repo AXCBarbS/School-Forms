@@ -39,3 +39,6 @@ media/
 data_backup.json
 
 *.sqlite3.*
+
+# Local movement data backups
+backup_movement_*/
