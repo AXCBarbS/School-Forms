@@ -1,27 +1,83 @@
 (function () {
-  const parts = JSON.parse(document.getElementById("agg-parts").textContent);
-  const n = v => { const x = parseInt(v, 10); return isNaN(x) ? 0 : x; };
+  "use strict";
+
+  const partsElement = document.getElementById("agg-parts");
+
+  // This script may also be loaded on a page without enrollment totals.
+  if (!partsElement) {
+    return;
+  }
+
+  let parts;
+
+  try {
+    parts = JSON.parse(partsElement.textContent);
+  } catch (error) {
+    console.error("Unable to read enrollment aggregate definitions.", error);
+    return;
+  }
+
+  function numberValue(value) {
+    const parsed = Number.parseInt(value, 10);
+    return Number.isNaN(parsed) || parsed < 0 ? 0 : parsed;
+  }
+
   function read(level, sex) {
-    const el = document.querySelector(`input[data-level="${level}"][data-sex="${sex}"]`);
-    return el ? n(el.value) : 0;
+    const input = document.querySelector(
+      `input[data-level="${level}"][data-sex="${sex}"]`
+    );
+
+    return input ? numberValue(input.value) : 0;
   }
-  function recalc() {
-    const lv = {};
-    document.querySelectorAll("[data-total-for]").forEach(td => {
-      const k = td.dataset.totalFor, m = read(k, "m"), f = read(k, "f");
-      lv[k] = [m, f]; td.textContent = m + f;
+
+  function recalculate() {
+    const levels = {};
+
+    // Calculate totals for the enrollment levels displayed on this page.
+    document.querySelectorAll("[data-total-for]").forEach((cell) => {
+      const level = cell.dataset.totalFor;
+      const male = read(level, "m");
+      const female = read(level, "f");
+
+      levels[level] = [male, female];
+      cell.textContent = male + female;
     });
-    Object.entries(parts).forEach(([key, list]) => {
-      let m = 0, f = 0; list.forEach(p => { m += lv[p][0]; f += lv[p][1]; });
-      ["m", "f", "t"].forEach((s, i) => {
-        const el = document.getElementById(`agg-${key}-${s}`);
-        if (el) el.textContent = i === 0 ? m : i === 1 ? f : m + f;
+
+    // Calculate aggregates safely, including when a level is not displayed.
+    Object.entries(parts).forEach(([key, levelKeys]) => {
+      let male = 0;
+      let female = 0;
+
+      levelKeys.forEach((levelKey) => {
+        const values = levels[levelKey] || [0, 0];
+
+        male += values[0];
+        female += values[1];
       });
+
+      const maleCell = document.getElementById(`agg-${key}-m`);
+      const femaleCell = document.getElementById(`agg-${key}-f`);
+      const totalCell = document.getElementById(`agg-${key}-t`);
+
+      if (maleCell) maleCell.textContent = male;
+      if (femaleCell) femaleCell.textContent = female;
+      if (totalCell) totalCell.textContent = male + female;
     });
   }
-  document.querySelectorAll("input.enr").forEach(i => i.addEventListener("input", recalc));
-  document.querySelectorAll("form[data-confirm]").forEach(f => f.addEventListener("submit", e => {
-    if (!confirm(f.dataset.confirm)) e.preventDefault();
-  }));
-  recalc();
+
+  // Recalculate whenever an enrollment value changes.
+  document.querySelectorAll("input.enr").forEach((input) => {
+    input.addEventListener("input", recalculate);
+  });
+
+  // Preserve confirmation dialogs for forms that request them.
+  document.querySelectorAll("form[data-confirm]").forEach((form) => {
+    form.addEventListener("submit", (event) => {
+      if (!window.confirm(form.dataset.confirm)) {
+        event.preventDefault();
+      }
+    });
+  });
+
+  recalculate();
 })();
