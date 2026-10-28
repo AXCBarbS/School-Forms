@@ -57,8 +57,6 @@ def users(request):
     )
 
 
-
-
 @require_POST
 @manager_required
 def user_action(request, pk, action):
@@ -118,7 +116,7 @@ def user_action(request, pk, action):
             f"{target.email}: {action} done.",
         )
 
-    # Preserve the selected Users tab without redirecting elsewhere.
+    # Preserve the selected Users tab using a safe local redirect.
     allowed_statuses = {
         "pending",
         "unverified",
@@ -128,12 +126,35 @@ def user_action(request, pk, action):
     }
 
     status = request.POST.get("status", "").strip()
-
-    # Support the existing form's next="?status=pending" value.
     next_value = request.POST.get("next", "").strip()
 
-    if next_value.startswith("?status="):
-        status = next_value.removeprefix("?status=").split("&", 1)[0]
+    if next_value:
+        # Handle query-only values such as "?status=pending".
+        if next_value.startswith("?"):
+            from urllib.parse import parse_qs, urlsplit
+
+            query_status = parse_qs(
+                urlsplit(next_value).query
+            ).get("status", [""])[0]
+
+            if query_status:
+                status = query_status
+
+        # Handle a full or relative local URL safely.
+        elif url_has_allowed_host_and_scheme(
+            next_value,
+            allowed_hosts={request.get_host()},
+            require_https=request.is_secure(),
+        ):
+            parsed_next = urlsplit(next_value)
+            from urllib.parse import parse_qs
+
+            query_status = parse_qs(
+                parsed_next.query
+            ).get("status", [""])[0]
+
+            if query_status:
+                status = query_status
 
     if status not in allowed_statuses:
         status = "pending"
@@ -141,7 +162,6 @@ def user_action(request, pk, action):
     return redirect(
         f"{reverse('manage:users')}?status={status}"
     )
-
 
 
 @manager_required
