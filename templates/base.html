@@ -1,4 +1,3 @@
-
 {% load static %}
 <!doctype html>
 <html lang="en">
@@ -17,22 +16,42 @@
   >
   <link href="{% static 'css/app.css' %}" rel="stylesheet">
 
+  <style>
+    .nav-notification-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .nav-notification-dot {
+      display: inline-block;
+      flex: 0 0 9px;
+      width: 9px;
+      height: 9px;
+      background-color: #ff3b30;
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px #12366b;
+      vertical-align: middle;
+    }
+
+    .nav-notification-dot[hidden] {
+      display: none;
+    }
+  </style>
+
   {% block styles %}{% endblock %}
 </head>
 
 <body>
-
 <nav class="navbar navbar-expand-lg navbar-dark app-navbar">
   <div class="container-fluid app-navbar-container">
 
-    <!-- Portal branding -->
     <a
       class="navbar-brand app-brand"
       href="{% url 'enrollment:dashboard' %}"
       aria-label="SF4 Portal - SDO Benguet home"
     >
       <span class="app-brand-mark" aria-hidden="true">SF4</span>
-
       <span class="app-brand-text">
         <span class="app-brand-title">School Forms 4 Portal</span>
         <small>Schools Division Office of Benguet</small>
@@ -40,8 +59,6 @@
     </a>
 
     {% if user.is_authenticated %}
-
-    <!-- Mobile navigation toggle -->
     <button
       class="navbar-toggler"
       type="button"
@@ -55,23 +72,30 @@
     </button>
 
     <div class="collapse navbar-collapse" id="mainNavigation">
-
-      <!-- Main navigation -->
       <ul class="navbar-nav me-auto app-nav-links">
 
-        <!-- Available to all authenticated users -->
         <li class="nav-item">
           <a class="nav-link" href="{% url 'enrollment:dashboard' %}">
             Schools
           </a>
         </li>
 
-        <!-- System administrator navigation only -->
         {% if user.is_system_admin %}
 
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'manage:users' %}">
-            Users
+          <a
+            class="nav-link nav-notification-link"
+            href="{% url 'manage:users' %}"
+          >
+            <span>Users</span>
+            {% if pending_user_count %}
+              <span
+                class="nav-notification-dot"
+                role="img"
+                aria-label="{{ pending_user_count }} pending user registration(s)"
+                title="{{ pending_user_count }} pending registration(s)"
+              ></span>
+            {% endif %}
           </a>
         </li>
 
@@ -87,6 +111,7 @@
           </a>
         </li>
 
+
         <li class="nav-item">
           <a class="nav-link" href="{% url 'admin:index' %}">
             Admin
@@ -95,25 +120,17 @@
 
         {% endif %}
 
-        <!-- Available to all authenticated users -->
         <li class="nav-item">
           <a class="nav-link" href="{% url 'enrollment:export' %}">
             Export Excel
           </a>
         </li>
-
       </ul>
 
-      <!-- Authenticated user information and account actions -->
       <div class="app-account-area">
-
         <div class="app-user-info">
           <span class="app-user-label">SIGNED IN AS</span>
-
-          <span class="app-user-name">
-            {{ user.full_name }}
-          </span>
-
+          <span class="app-user-name">{{ user.full_name }}</span>
           <span class="app-user-district">
             {% if user.district %}
               {{ user.district.name }} District
@@ -124,7 +141,6 @@
         </div>
 
         <div class="app-account-actions">
-
           <a
             class="btn btn-sm btn-outline-light app-account-btn"
             href="{% url 'accounts:email_change' %}"
@@ -138,7 +154,6 @@
             class="d-inline"
           >
             {% csrf_token %}
-
             <button
               type="submit"
               class="btn btn-sm btn-light app-logout-btn"
@@ -146,34 +161,24 @@
               Sign Out
             </button>
           </form>
-
         </div>
       </div>
-
     </div>
     {% endif %}
-
   </div>
 </nav>
 
-<!-- Subtle institutional accent -->
 <div class="app-brand-accent" aria-hidden="true"></div>
 
 <main class="container-fluid app-main">
-
-  <!-- Django flash messages -->
   {% if messages %}
   <section class="app-messages" aria-label="Notifications">
-
     {% for m in messages %}
     <div
       class="alert alert-{% if 'error' in m.tags %}danger{% elif 'success' in m.tags %}success{% elif 'warning' in m.tags %}warning{% elif 'info' in m.tags %}info{% else %}secondary{% endif %} alert-dismissible fade show app-alert"
       role="{% if 'error' in m.tags %}alert{% else %}status{% endif %}"
     >
-      <div class="app-alert-content">
-        {{ m }}
-      </div>
-
+      <div class="app-alert-content">{{ m }}</div>
       <button
         type="button"
         class="btn-close"
@@ -182,16 +187,12 @@
       ></button>
     </div>
     {% endfor %}
-
   </section>
   {% endif %}
 
-  <!-- Individual page content -->
   {% block content %}{% endblock %}
-
 </main>
 
-<!-- Portal footer -->
 <footer class="app-footer">
   <div class="container-fluid app-footer-inner">
     <span>School Forms 4 Portal</span>
@@ -200,9 +201,6 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 {% block scripts %}{% endblock %}
-
 </body>
 </html>
-```

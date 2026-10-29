@@ -5,28 +5,51 @@
 {% block content %}
 <h1 class="h4 mb-3">User accounts</h1>
 
+
 <ul class="nav nav-pills mb-3">
   <li class="nav-item">
     <a class="nav-link {% if status == 'pending' %}active{% endif %}"
-       href="?status=pending">Awaiting approval</a>
+       href="?status=pending">
+      Awaiting approval
+    </a>
   </li>
+
   <li class="nav-item">
     <a class="nav-link {% if status == 'unverified' %}active{% endif %}"
-       href="?status=unverified">Unverified email</a>
+       href="?status=unverified">
+      Unverified email
+    </a>
   </li>
+
   <li class="nav-item">
     <a class="nav-link {% if status == 'approved' %}active{% endif %}"
-       href="?status=approved">Approved</a>
+       href="?status=approved">
+      Approved
+    </a>
   </li>
+
   <li class="nav-item">
     <a class="nav-link {% if status == 'rejected' %}active{% endif %}"
-       href="?status=rejected">Rejected</a>
+       href="?status=rejected">
+      Rejected
+    </a>
   </li>
+
   <li class="nav-item">
     <a class="nav-link {% if status == 'suspended' %}active{% endif %}"
-       href="?status=suspended">Suspended</a>
+       href="?status=suspended">
+      Suspended
+    </a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link"
+       href="{% url 'manage:password_reset_requests' %}">
+      Password Reset Requests
+    </a>
   </li>
 </ul>
+
 
 <div class="card">
   <div class="table-responsive">

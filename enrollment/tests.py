@@ -343,18 +343,43 @@ class ManagementPermissionTests(BaseTest):
         self.assertNotContains(r, "Bakun")
 
 
+
 class ExportTests(BaseTest):
     def test_export_totals_and_layout(self):
         rec = get_or_create_record(self.s1a, self.u1)
         save_values(rec, ATOK_ES, self.u1)
+
         self.login(self.u1)
-        r = self.client.get(reverse("enrollment:export"))
-        self.assertIn("spreadsheetml", r["Content-Type"])
-        ws = load_workbook(io.BytesIO(r.content)).active
+        response = self.client.get(reverse("enrollment:export"))
+
+        self.assertIn("spreadsheetml", response["Content-Type"])
+
+        ws = load_workbook(io.BytesIO(response.content)).active
         rows = list(ws.iter_rows(min_row=4, values_only=True))
-        adoy = next(x for x in rows if x[2] == "Adoyunan ES")
+
+        adoy = next(row for row in rows if row[2] == "Adoyunan ES")
         self.assertEqual(adoy[1], "100001")
-        self.assertEqual(adoy[6:9], (6, 4, 10))                      # Kinder M, F, T
-        total_row = next(x for x in rows if x[2] == "TOTAL")
-        self.assertEqual(total_row[-3:], (53, 48, 101))              # K-12 grand total
+        self.assertEqual(adoy[6:9], (6, 4, 10))  # Kinder M, F, T
+
+        total_row = next(row for row in rows if row[2] == "TOTAL")
+
+        # Locate the K-12 aggregate using the export schema rather
+        # than assuming it occupies the final three worksheet columns.
+        from .schema import EXPORT_ORDER
+
+        enrollment_column = 6  # First six columns contain school details.
+        k12_column = None
+
+        for kind, key in EXPORT_ORDER:
+            if kind == "agg" and key == "k12":
+                k12_column = enrollment_column
+                break
+            enrollment_column += 3
+
+        self.assertIsNotNone(k12_column, "K-12 aggregate is missing from EXPORT_ORDER")
+        self.assertEqual(
+            total_row[k12_column:k12_column + 3],
+            (53, 48, 101),
+        )
+
         self.assertEqual(ws.cell(2, 7).value, "Kinder")
